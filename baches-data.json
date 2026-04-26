@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "actualizado": "2026-04-26",
+  "entidad": "GADM Riobamba",
+  "total": 0,
+  "semana": 0,
+  "cronograma": [
+    {
+      "nombre": "Calle Nueva York entre Av. Antonio Jose de Sucre y 5 de Junio",
+      "estado": "programado",
+      "fecha_ini": "2026-04-27",
+      "fecha_fin": "2026-04-28",
+      "observaciones": "Trabajos desde la 1:00 con Riobamba EP",
+      "puntos": [
+        [
+          -1.664416,
+          -78.649299
+        ],
+        [
+          -1.668633,
+          -78.644413
+        ]
+      ]
+    },
+    {
+      "nombre": "Calle México desde la Juan Montalvo hasta la García Moreno",
+      "estado": "programado",
+      "fecha_ini": "2026-04-29",
+      "fecha_fin": "2026-04-29",
+      "observaciones": "Trabajo desde la 1:00, conjuntamente con Riobamba EP",
+      "puntos": [
+        [
+          -1.665678,
+          -78.64673
+        ],
+        [
+          -1.663617,
+          -78.64901
+        ]
+      ]
+    },
+    {
+      "nombre": "Calle Luz Elisa Borja desde la Av. Antonio Jose de Sucre hasta la Garcia Moreno",
+      "estado": "programado",
+      "fecha_ini": "2026-04-29",
+      "fecha_fin": "2026-04-29",
+      "observaciones": "Trabajo desde la 1:00 am con Riobamba EP",
+      "puntos": [
+        [
+          -1.662596,
+          -78.649098
+        ],
+        [
+          -1.665602,
+          -78.64567
+        ]
+      ]
+    }
+  ],
+  "baches": []
+}
