@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GADM Riobamba · Admin Baches 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+  --navy:#1C2B5E; --navy2:#162050;
+  --red:#C0392B;  --red2:#E74C3C;
+  --gold:#F1C40F; --amber:#B8690A;
+  --green:#1B7B4E;
+  --white:#FFFFFF; --off-white:#F5F6FA;
+  --gray-50:#ECEEF4; --gray-100:#D8DCE8; --gray-200:#B8BECE;
+  --gray-400:#7A839A; --gray-600:#4A5468; --gray-800:#1C2440;
+  --sev-alta:#C0392B; --sev-alta-bg:#FDECEA;
+  --sev-media:#B8690A; --sev-media-bg:#FDF3E3;
+  --sev-baja:#1B7B4E; --sev-baja-bg:#E8F5EF;
+  --radius:10px; --radius-sm:6px;
+  --shadow:0 2px 12px rgba(28,43,94,0.09);
+  --shadow-md:0 4px 24px rgba(28,43,94,0.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{font-family:'DM Sans',sans-serif;background:#F0F2F8;color:var(--gray-800);min-height:100vh}
+
+/* TOPSTRIP */
+.topstrip{background:#162050;padding:5px 2.5rem;display:flex;align-items:center;gap:2rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.topstrip a{text-decoration:none;display:flex;align-items:center;gap:3px}
+.tse{font-size:.65rem;font-weight:700;letter-spacing:.05em}
+.tse.azul{color:#6FB0E8}.tse.oro{color:var(--gold)}.tse.verde{color:#58C474}.tse.cyan{color:#5BC0DE}.tse.blanco{color:#fff}
+.topstrip-right{margin-left:auto;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.04em}
+
+/* HEADER */
+header{background:var(--navy);padding:0 2.5rem;display:flex;align-items:stretch;justify-content:space-between;border-bottom:3px solid var(--red)}
+.header-brand{display:flex;align-items:center;gap:1.25rem;padding:1.25rem 0}
+.header-crest{width:54px;height:54px;border-radius:8px;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.6rem}
+.header-text h1{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff;font-weight:400;letter-spacing:.01em}
+.header-text p{font-size:.72rem;color:#E8A8A2;margin-top:2px;letter-spacing:.04em;text-transform:uppercase}
+.header-nav{display:flex;align-items:center}
+.nav-btn{background:transparent;border:none;color:var(--gray-200);font-family:'DM Sans',sans-serif;font-size:.8rem;padding:0 1.1rem;cursor:pointer;height:100%;border-bottom:3px solid transparent;transition:all .15s;letter-spacing:.02em}
+.nav-btn:hover{color:#fff}
+.nav-btn.active{color:var(--red2);border-bottom-color:var(--red2);font-weight:500}
+.header-date{display:flex;align-items:center;font-size:.72rem;color:var(--gray-400);padding:0 0 0 1.5rem;border-left:1px solid rgba(255,255,255,.1);margin-left:.5rem}
+
+/* MAIN */
+main{max-width:1280px;margin:0 auto;padding:2rem 2rem 3rem}
+
+/* HERO */
+.hero-strip{background:var(--navy);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.hero-strip h2{font-family:'DM Serif Display',serif;font-size:1.5rem;color:#fff;font-weight:400}
+.hero-strip p{font-size:.8rem;color:#E8A8A2;margin-top:4px}
+.hero-badge{background:white;color:var(--navy);font-size:.72rem;font-weight:500;padding:4px 14px;border-radius:20px;white-space:nowrap}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.metric-card{background:#fff;border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);border-left:3px solid transparent;transition:transform .12s}
+.metric-card:hover{transform:translateY(-1px)}
+.metric-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);margin-bottom:6px}
+.metric-value{font-size:2rem;font-weight:300;color:var(--navy);line-height:1;font-family:'DM Serif Display',serif}
+.metric-sub{font-size:.7rem;color:var(--gray-400);margin-top:5px}
+.mc-total{border-left-color:var(--red)}
+.mc-alta{border-left-color:var(--sev-alta)}
+.mc-media{border-left-color:var(--sev-media)}
+.mc-baja{border-left-color:var(--sev-baja)}
+
+/* SEMANA CARDS */
+.sem-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.sem-card{background:#fff;border-radius:var(--radius);padding:1.2rem 1.5rem;box-shadow:var(--shadow);display:flex;align-items:center;gap:1rem}
+.sem-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.sem-info h3{font-family:'DM Serif Display',serif;font-size:2.2rem;font-weight:400;color:var(--navy);line-height:1}
+.sem-info p{font-size:.72rem;color:var(--gray-400);margin-top:3px}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);padding:1.4rem 1.6rem;box-shadow:var(--shadow)}
+.card-full{grid-column:1/-1}
+.card-title{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gray-400);margin-bottom:1rem;font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
+
+/* TABLA */
+.search-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.search-input{flex:1;min-width:200px;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--navy);background:var(--off-white);border:1px solid var(--gray-100);border-radius:var(--radius-sm);padding:7px 11px;outline:none}
+.search-input:focus{border-color:var(--navy);background:#fff}
+.filter-chip{font-size:.7rem;padding:4px 11px;border-radius:20px;border:1px solid var(--gray-100);background:transparent;color:var(--gray-600);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
+.filter-chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.filter-chip:hover:not(.active){background:var(--gray-50)}
+.results-count{font-size:.7rem;color:var(--gray-400);margin-left:auto;white-space:nowrap}
+.baches-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.baches-table thead th{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500;padding:0 10px 8px;text-align:left;border-bottom:1.5px solid var(--gray-100);white-space:nowrap}
+.baches-table thead th.th-right{text-align:right}
+.baches-table tbody tr{border-bottom:1px solid var(--gray-50);cursor:pointer;transition:background .1s}
+.baches-table tbody tr:hover{background:var(--off-white)}
+.baches-table tbody tr.expanded{background:var(--off-white)}
+.baches-table td{padding:9px 10px;vertical-align:middle}
+.td-nombre{font-weight:500;color:var(--navy);max-width:300px}
+.td-nombre-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;display:block}
+.td-codigo{font-size:.68rem;color:var(--gray-400)}
+.td-right{text-align:right;white-space:nowrap}
+.sev-badge{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.sev-alta{background:var(--sev-alta-bg);color:var(--sev-alta)}
+.sev-media{background:var(--sev-media-bg);color:var(--sev-media)}
+.sev-baja{background:var(--sev-baja-bg);color:var(--sev-baja)}
+.semana-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px}
+.expand-row td{padding:0}
+.expand-inner{padding:12px 16px 14px 28px;background:var(--off-white);border-bottom:1px solid var(--gray-100)}
+.expand-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 24px}
+.expand-item label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);margin-bottom:2px}
+.expand-item span{font-size:.75rem;color:var(--navy);font-weight:500}
+.obs-box{margin-top:8px;font-size:.72rem;color:var(--gray-600);background:#fff;padding:7px 10px;border-radius:var(--radius-sm);border-left:3px solid var(--gray-200);line-height:1.5}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.form-full{margin-bottom:12px}
+.form-group label{display:block;font-size:.7rem;font-weight:500;color:var(--gray-600);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group select,.form-group textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--navy);background:var(--off-white);border:1px solid var(--gray-100);border-radius:var(--radius-sm);padding:8px 11px;outline:none;transition:border-color .15s,background .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy);background:#fff}
+.form-group textarea{resize:vertical;min-height:70px}
+.coord-result{font-size:.7rem;color:var(--green);margin-top:4px;font-weight:500}
+.hint{font-size:.68rem;color:var(--gray-400);margin-top:4px;font-style:italic}
+
+/* MAP COORD PICKER */
+#mapa-picker-wrap{position:relative}
+#mapa-picker-wrap .picker-hint{font-size:.72rem;color:var(--amber);font-weight:500;padding:6px 0;margin-bottom:6px}
+#map-coord-picker{height:300px;border-radius:var(--radius-sm);border:1px solid var(--gray-100);background:#e8ecf0;cursor:crosshair}
+#map-general{height:420px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray-100);background:#e8ecf0}
+
+/* BUTTONS */
+.btn{font-family:'DM Sans',sans-serif;font-size:.78rem;padding:8px 18px;border-radius:var(--radius-sm);border:1.5px solid var(--gray-200);background:transparent;color:var(--gray-600);cursor:pointer;transition:all .15s;font-weight:500}
+.btn:hover{background:var(--gray-50);border-color:var(--gray-400);color:var(--navy)}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy2)}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-red:hover{background:var(--red2);border-color:var(--red2)}
+.btn-danger{border-color:var(--red);color:var(--red)}
+.btn-danger:hover{background:var(--sev-alta-bg)}
+.btn-sm{font-size:.7rem;padding:5px 12px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* ALERTS */
+.alert{font-size:.78rem;padding:9px 14px;border-radius:var(--radius-sm);margin-bottom:12px;border-left:3px solid}
+.alert-ok{background:var(--sev-baja-bg);color:var(--green);border-left-color:var(--green)}
+.alert-warn{background:var(--sev-media-bg);color:var(--amber);border-left-color:var(--amber)}
+.alert-info{background:#E8EBFA;color:var(--navy);border-left-color:var(--navy)}
+.sep{height:1px;background:var(--gray-50);margin:14px 0}
+.section-title{font-size:.85rem;font-weight:500;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--gray-100)}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--gray-200);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;transition:all .15s}
+.upload-zone:hover{border-color:var(--red);background:#FDECEA}
+.upload-icon{font-size:2rem;margin-bottom:10px}
+.upload-text{font-size:.82rem;color:var(--gray-600);font-weight:500}
+.upload-sub{font-size:.7rem;color:var(--gray-400);margin-top:4px}
+
+/* HISTORIAL */
+.hist-row{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--gray-50);font-size:.78rem}
+.hist-row:last-child{border-bottom:none}
+.hist-date{color:var(--gray-400);min-width:88px;font-size:.7rem}
+.hist-nota{color:var(--navy);flex:1}
+.hist-sev{font-size:.65rem;font-weight:700;min-width:50px;text-align:right}
+
+/* CHART */
+.chart-wrap{position:relative;height:200px}
+
+/* GITHUB */
+.gh-panel{border:1.5px solid var(--gray-100);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}
+.gh-status{font-size:.75rem;padding:8px 12px;border-radius:var(--radius-sm);margin-top:10px}
+.gh-ok{background:var(--sev-baja-bg);color:var(--green)}
+.gh-err{background:var(--sev-alta-bg);color:var(--red)}
+.gh-info{background:#E8EBFA;color:var(--navy)}
+.gh-spinner{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOGIN */
+#login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1C2B5E 0%,#243580 60%,#C0392B 100%);display:flex;align-items:center;justify-content:center;z-index:99999}
+.login-box{background:white;border-radius:14px;padding:2.5rem 2.8rem;box-shadow:0 20px 60px rgba(0,0,0,.35);width:100%;max-width:380px;text-align:center}
+.login-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#1C2B5E;margin-bottom:4px}
+.login-sub{font-size:.75rem;color:#7A839A;margin-bottom:1.6rem}
+.login-field{margin-bottom:1rem}
+.login-field input{width:100%;padding:11px 14px;border:1.5px solid #D8DCE8;border-radius:8px;font-size:.9rem;font-family:'DM Sans',sans-serif;color:#1C2440;outline:none;transition:border-color .15s}
+.login-field input:focus{border-color:#1C2B5E}
+.login-btn{width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:8px;font-size:.9rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;margin-top:4px}
+.login-btn:hover{background:var(--red2)}
+.login-error{font-size:.75rem;color:var(--red);margin-top:8px;min-height:18px}
+.login-badge{font-size:.65rem;color:#7A839A;margin-top:1.2rem;letter-spacing:.04em}
+#main-content{display:none}
+
+/* LEAFLET popups */
+.leaflet-popup-content-wrapper{border-radius:var(--radius-sm)!important;box-shadow:var(--shadow-md)!important;font-family:'DM Sans',sans-serif!important}
+.leaflet-popup-content{font-size:.8rem;color:var(--navy);margin:10px 14px!important}
+.popup-title{font-weight:500;font-size:.9rem;margin-bottom:4px;color:var(--navy)}
+.popup-row{display:flex;justify-content:space-between;gap:16px;font-size:.72rem;color:var(--gray-600);padding:2px 0}
+
+/* PARROQUIA labels */
+.parr-label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75;white-space:nowrap;text-shadow:0 1px 2px rgba(255,255,255,.8)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .sem-cards{grid-template-columns:1fr}
+  .main-grid{grid-template-columns:1fr}
+  header{padding:0 1rem}
+  main{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPSTRIP -->
+<div class="topstrip">
+  <a href="#"><span class="tse azul">e·</span><span class="tse blanco">GOB</span></a>
+  <a href="#"><span class="tse oro">e·</span><span class="tse blanco">DOC</span></a>
+  <a href="#"><span class="tse verde">TERRITORIOS INTELIGENTES</span></a>
+  <a href="#"><span class="tse azul">e·</span><span class="tse blanco">REGIS</span></a>
+  <a href="#"><span class="tse cyan">e·</span><span class="tse blanco">AQUA</span></a>
+  <div class="topstrip-right">SISTEMA MUNICIPAL DE GESTIÓN · RIOBAMBA</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div style="font-size:2.5rem;margin-bottom:.8rem">🏛️</div>
+    <div class="login-title">Panel de Baches</div>
+    <div class="login-sub">Dirección de Gestión de Obras Públicas · GADM Riobamba</div>
+    <div class="login-field"><input type="text" id="login-user" placeholder="Usuario" autocomplete="username"></div>
+    <div class="login-field"><input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">INGRESAR</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-badge">GADM RIOBAMBA · SISTEMA DE BACHES · 2025</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main-content">
+
+<header>
+  <div class="header-brand">
+    <div class="header-crest">🕳️</div>
+    <div class="header-text">
+      <h1>Gestión de Baches · Riobamba</h1>
+      <p>GADM Riobamba · Dirección de Obras Públicas · Mejoramiento Vial 2025</p>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="setView('dashboard')">Resumen</button>
+    <button class="nav-btn" onclick="setView('mapa')">Mapa</button>
+    <button class="nav-btn" onclick="setView('nuevo')">Nuevo bache</button>
+    <button class="nav-btn" onclick="setView('actualizar')">Actualizar</button>
+    <button class="nav-btn" onclick="setView('importar')">Importar</button>
+    <button class="nav-btn" onclick="setView('cronograma')">Cronograma</button>
+    <button class="nav-btn" onclick="setView('resumen-cron')">📊 Resumen vial</button>
+    <button class="nav-btn" onclick="setView('publicar')" style="color:var(--red2);font-weight:500">↑ Publicar</button>
+  </nav>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<main>
+
+  <!-- ── DASHBOARD ── -->
+  <div id="view-dashboard">
+    <div class="hero-strip" style="background:linear-gradient(135deg,#1C2B5E 0%,#243580 60%,#C0392B 100%)">
+      <div>
+        <h2>Estado de baches · Cantón Riobamba 2025</h2>
+        <p>Estamos trabajando en el mejoramiento vial · Intervención ciudadana activa</p>
+      </div>
+      <span class="hero-badge" id="heroBadge">0 baches registrados</span>
+    </div>
+
+    <!-- Contadores grandes -->
+    <div class="sem-cards">
+      <div class="sem-card">
+        <div class="sem-icon" style="background:var(--sev-alta-bg)">🕳️</div>
+        <div class="sem-info">
+          <h3 id="mTotal">0</h3>
+          <p>Baches totales acumulados</p>
+        </div>
+      </div>
+      <div class="sem-card">
+        <div class="sem-icon" style="background:#E8EBFA">📅</div>
+        <div class="sem-info">
+          <h3 id="mSemana">0</h3>
+          <p>Intervenidos esta semana</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas por severidad -->
+    <div class="metrics-grid">
+      <div class="metric-card mc-total">
+        <div class="metric-label">Con coordenadas</div>
+        <div class="metric-value" id="mCoords">0</div>
+        <div class="metric-sub">en el mapa</div>
+      </div>
+      <div class="metric-card mc-alta">
+        <div class="metric-label">Severidad Alta</div>
+        <div class="metric-value" id="mAlta">0</div>
+        <div class="metric-sub" style="color:var(--sev-alta)">Urgente</div>
+      </div>
+      <div class="metric-card mc-media">
+        <div class="metric-label">Severidad Media</div>
+        <div class="metric-value" id="mMedia">0</div>
+        <div class="metric-sub" style="color:var(--sev-media)">Próximo</div>
+      </div>
+      <div class="metric-card mc-baja">
+        <div class="metric-label">Severidad Baja</div>
+        <div class="metric-value" id="mBaja">0</div>
+        <div class="metric-sub" style="color:var(--sev-baja)">Programado</div>
+      </div>
+    </div>
+
+    <!-- Tabla + Charts -->
+    <div class="main-grid">
+      <div class="card card-full">
+        <div class="card-title">
+          <span id="bachesListTitle">Baches registrados</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-sm" onclick="setView('mapa')">Ver mapa</button>
+            <button class="btn btn-sm btn-red" onclick="setView('nuevo')">+ Nuevo</button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <input class="search-input" id="searchInput" placeholder="Buscar por nombre, sector, descripción..." oninput="filtrarBaches()">
+          <button class="filter-chip active" onclick="setFiltroSev(this,'todos')">Todos</button>
+          <button class="filter-chip" onclick="setFiltroSev(this,'alta')">🔴 Alta</button>
+          <button class="filter-chip" onclick="setFiltroSev(this,'media')">🟠 Media</button>
+          <button class="filter-chip" onclick="setFiltroSev(this,'baja')">🟢 Baja</button>
+          <button class="filter-chip" onclick="setFiltroSev(this,'semana')">📅 Esta semana</button>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+        <div id="bachesList" style="overflow-x:auto"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Distribución por severidad</div>
+        <div class="chart-wrap"><canvas id="chartSev"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Baches por semana (últimos 8)</div>
+        <div class="chart-wrap"><canvas id="chartSem"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NUEVO BACHE ── -->
+  <div id="view-nuevo" style="display:none">
+    <div class="card">
+      <div class="section-title">Registrar nuevo bache</div>
+      <div id="form-alert"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre / sector *</label><input id="f-nombre" placeholder="Ej: Av. Daniel León Borja frente al #23"></div>
+        <div class="form-group"><label>Severidad *</label>
+          <select id="f-sev">
+            <option value="">Seleccionar...</option>
+            <option value="alta">Alta — Urgente</option>
+            <option value="media">Media — Próximo plazo</option>
+            <option value="baja">Baja — Programado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha de registro *</label><input id="f-fecha" type="date"></div>
+        <div class="form-group"><label>¿Intervenido esta semana?</label>
+          <select id="f-semana">
+            <option value="">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-full form-group"><label>Descripción / novedades</label>
+        <textarea id="f-desc" placeholder="Dimensiones, estado del pavimento, riesgo vial, novedades..."></textarea>
+      </div>
+      <div class="form-group form-full"><label>URL de foto (opcional)</label>
+        <input id="f-foto" placeholder="https://...jpg">
+      </div>
+      <div class="sep"></div>
+      <div style="font-size:.75rem;font-weight:500;color:var(--navy);margin-bottom:10px">Coordenadas — haz clic en el mapa o ingresa manualmente</div>
+      <div id="mapa-picker-wrap">
+        <div class="picker-hint">🖱️ Clic en el mapa para capturar coordenadas exactas</div>
+        <div id="map-coord-picker"></div>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <div class="form-group"><label>Latitud</label><input id="f-lat" type="number" step="0.000001" placeholder="-1.671234" oninput="previewCoord()"></div>
+        <div class="form-group"><label>Longitud</label><input id="f-lng" type="number" step="0.000001" placeholder="-78.647890" oninput="previewCoord()"></div>
+      </div>
+      <div id="coord-preview" class="coord-result"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="guardarBache()">Guardar bache</button>
+        <button class="btn" onclick="limpiarFormB()">Limpiar</button>
+        <button class="btn" onclick="setView('dashboard')">Volver</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACTUALIZAR ── -->
+  <div id="view-actualizar" style="display:none">
+    <div class="card">
+      <div class="section-title">Actualizar / editar bache</div>
+      <div id="upd-alert"></div>
+      <div class="form-full form-group">
+        <label>Seleccionar bache *</label>
+        <select id="upd-bache" onchange="onBacheSelect()"><option value="">-- Seleccionar --</option></select>
+      </div>
+      <div id="upd-form" style="display:none">
+        <div class="sep"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre / sector</label><input id="upd-nombre" placeholder="Sector"></div>
+          <div class="form-group"><label>Severidad</label>
+            <select id="upd-sev">
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fecha</label><input id="upd-fecha" type="date"></div>
+          <div class="form-group"><label>Intervenido esta semana</label>
+            <select id="upd-semana"><option value="">No</option><option value="si">Sí</option></select>
+          </div>
+        </div>
+        <div class="form-full form-group"><label>Descripción</label><textarea id="upd-desc"></textarea></div>
+        <div class="form-group form-full"><label>URL de foto</label><input id="upd-foto" placeholder="https://...jpg"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Latitud</label><input id="upd-lat" type="number" step="0.000001"></div>
+          <div class="form-group"><label>Longitud</label><input id="upd-lng" type="number" step="0.000001"></div>
+        </div>
+        <div class="form-full form-group"><label>Novedad / comentario de actualización</label>
+          <input id="upd-nota" placeholder="Describe la novedad o cambio...">
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="actualizarBache()">Guardar actualización</button>
+          <button class="btn btn-danger" onclick="eliminarBache()">Eliminar bache</button>
+          <button class="btn" onclick="setView('dashboard')">Volver</button>
+        </div>
+      </div>
+      <div id="upd-historial"></div>
+    </div>
+  </div>
+
+  <!-- ── MAPA ── -->
+  <div id="view-mapa" style="display:none">
+    <div class="hero-strip">
+      <div>
+        <h2>Mapa de baches</h2>
+        <p>Ubicación de todos los baches georreferenciados · Riobamba</p>
+      </div>
+      <button class="btn btn-red" onclick="setView('nuevo')" style="align-self:center">+ Nuevo bache</button>
+    </div>
+    <div class="card card-full">
+      <div class="card-title">
+        <span>Baches georreferenciados</span>
+        <span id="mapa-count" style="font-size:.7rem;color:var(--gray-400)">0 baches</span>
+      </div>
+      <div id="map-general"></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:.7rem;color:var(--gray-600)">
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--sev-alta)"></div>Alta</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--sev-media)"></div>Media</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--sev-baja)"></div>Baja</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--navy);opacity:.4"></div>Parroquias</div>
+      </div>
+    </div>
+    <div class="btn-group"><button class="btn" onclick="setView('dashboard')">Volver al resumen</button></div>
+  </div>
+
+  <!-- ── IMPORTAR ── -->
+  <div id="view-importar" style="display:none">
+    <div class="card">
+      <div class="section-title">Importar baches desde Excel / CSV</div>
+      <div class="alert alert-info">
+        Columnas esperadas (separador coma o punto y coma):<br>
+        <strong>nombre, lat, lng, severidad, fecha, semana, descripcion, foto_url</strong><br>
+        <span style="font-size:.7rem">Las columnas <code>lat</code> y <code>lng</code> son necesarias para el mapa. Usa punto o coma decimal.</span>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;font-weight:500;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">¿Qué hacer si el bache ya existe?</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--navy);background:var(--off-white);border:1.5px solid var(--gray-100);border-radius:var(--radius-sm);padding:7px 14px">
+            <input type="radio" name="import-mode" value="skip" checked style="accent-color:var(--navy)"> Ignorar duplicados
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--navy);background:var(--off-white);border:1.5px solid var(--gray-100);border-radius:var(--radius-sm);padding:7px 14px">
+            <input type="radio" name="import-mode" value="update" style="accent-color:var(--navy)"> Actualizar existentes
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.8rem;color:var(--navy);background:var(--off-white);border:1.5px solid var(--gray-100);border-radius:var(--radius-sm);padding:7px 14px">
+            <input type="radio" name="import-mode" value="replace" style="accent-color:var(--navy)"> Reemplazar todo
+          </label>
+        </div>
+      </div>
+
+      <div class="upload-zone" onclick="document.getElementById('fileImport').click()">
+        <div class="upload-icon">📂</div>
+        <div class="upload-text">Clic para seleccionar archivo CSV o Excel</div>
+        <div class="upload-sub">.csv · .xlsx · .xls · separador coma o punto y coma · UTF-8</div>
+        <input type="file" id="fileImport" accept=".csv,.xlsx,.xls" style="display:none" onchange="importFile(event)">
+      </div>
+      <div id="import-alert" style="margin-top:12px"></div>
+      <div class="sep"></div>
+      <div class="section-title" style="font-size:.8rem">Descargar plantilla</div>
+      <button class="btn btn-red" onclick="downloadTemplate()">Descargar plantilla CSV de ejemplo</button>
+      <div class="btn-group"><button class="btn" onclick="setView('dashboard')">Volver</button></div>
+    </div>
+  </div>
+
+  <!-- ── CRONOGRAMA ── -->
+  <div id="view-cronograma" style="display:none">
+    <div class="hero-strip" style="background:linear-gradient(135deg,#1B7B4E 0%,#1C2B5E 100%)">
+      <div>
+        <h2>Cronograma de intervenciones viales</h2>
+        <p>Registra sectores y vías programadas · Se publicará en el portal ciudadano</p>
+      </div>
+      <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);align-self:center" onclick="setView('publicar')">↑ Publicar</button>
+    </div>
+
+    <!-- FORMULARIO NUEVA INTERVENCIÓN -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="section-title">Nueva intervención vial</div>
+      <div id="cron-alert"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre del sector / vía *</label><input id="cr-nombre" placeholder="Ej: Av. Daniel León Borja entre Tarqui y García Moreno"></div>
+        <div class="form-group"><label>Estado *</label>
+          <select id="cr-estado">
+            <option value="programado">🕐 Programado</option>
+            <option value="ejecucion">🚧 En ejecución</option>
+            <option value="ejecutado">✅ Ejecutado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha inicio *</label><input id="cr-fecha-ini" type="date"></div>
+        <div class="form-group"><label>Fecha fin estimada</label><input id="cr-fecha-fin" type="date"></div>
+      </div>
+      <div class="form-full form-group"><label>Observaciones</label>
+        <textarea id="cr-obs" placeholder="Descripción de trabajos, empresa contratista, longitud de vía..."></textarea>
+      </div>
+
+      <div class="sep"></div>
+      <div style="font-size:.75rem;font-weight:500;color:var(--navy);margin-bottom:6px">Traza de la vía en el mapa</div>
+      <div style="font-size:.72rem;color:var(--amber);font-weight:500;margin-bottom:8px">🖱️ Haz clic en el mapa para agregar puntos de la vía · Mínimo 2 puntos</div>
+      <div id="map-cron-picker" style="height:320px;border-radius:var(--radius-sm);border:1px solid var(--gray-100);background:#e8ecf0;cursor:crosshair"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+        <span style="font-size:.72rem;color:var(--gray-400)">Puntos capturados:</span>
+        <span id="cr-puntos-count" style="font-size:.72rem;font-weight:500;color:var(--navy)">0</span>
+        <button class="btn btn-sm btn-danger" onclick="limpiarTrazado()">Limpiar trazado</button>
+      </div>
+      <div id="cr-puntos-list" style="font-size:.68rem;color:var(--gray-400);margin-top:4px;max-height:60px;overflow-y:auto"></div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="guardarIntervencion()">Guardar intervención</button>
+        <button class="btn" onclick="limpiarFormCron()">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- LISTA DE INTERVENCIONES -->
+    <div class="card">
+      <div class="card-title">
+        <span id="cron-list-title">Intervenciones registradas</span>
+        <div style="display:flex;gap:6px">
+          <button class="filter-chip active" onclick="setFiltroCron(this,'todos')">Todas</button>
+          <button class="filter-chip" onclick="setFiltroCron(this,'programado')">🕐 Programadas</button>
+          <button class="filter-chip" onclick="setFiltroCron(this,'ejecucion')">🚧 En ejecución</button>
+          <button class="filter-chip" onclick="setFiltroCron(this,'ejecutado')">✅ Ejecutadas</button>
+        </div>
+      </div>
+      <div id="cron-lista"></div>
+    </div>
+  </div>
+
+  <!-- ── RESUMEN CRONOGRAMA ── -->
+  <div id="view-resumen-cron" style="display:none">
+    <div class="hero-strip" style="background:linear-gradient(135deg,#1B7B4E 0%,#1C2B5E 100%)">
+      <div>
+        <h2>Resumen de intervenciones viales</h2>
+        <p>Tablero de control · Avance del cronograma 2025</p>
+      </div>
+      <div style="display:flex;gap:8px;align-self:center">
+        <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)" onclick="setView('cronograma')">+ Nueva intervención</button>
+        <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)" onclick="setView('publicar')">↑ Publicar</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="metrics-grid" style="margin-bottom:1.2rem" id="rc-kpis">
+      <div class="metric-card" style="border-left-color:#B8690A">
+        <div class="metric-label">Programadas</div>
+        <div class="metric-value" id="rc-prog" style="color:#B8690A">0</div>
+        <div class="metric-sub">pendientes de inicio</div>
+      </div>
+      <div class="metric-card" style="border-left-color:var(--navy)">
+        <div class="metric-label">En ejecución</div>
+        <div class="metric-value" id="rc-ejec" style="color:var(--navy)">0</div>
+        <div class="metric-sub">trabajos activos</div>
+      </div>
+      <div class="metric-card" style="border-left-color:var(--green)">
+        <div class="metric-label">Ejecutadas</div>
+        <div class="metric-value" id="rc-done" style="color:var(--green)">0</div>
+        <div class="metric-sub">completadas</div>
+      </div>
+      <div class="metric-card" style="border-left-color:var(--red)">
+        <div class="metric-label">Avance total</div>
+        <div class="metric-value" id="rc-pct" style="color:var(--red)">0%</div>
+        <div class="metric-sub">% ejecutado vs total</div>
+      </div>
+    </div>
+
+    <!-- Barra de avance -->
+    <div class="card" style="margin-bottom:1.2rem">
+      <div class="card-title">Avance del cronograma</div>
+      <div style="display:flex;gap:0;border-radius:6px;overflow:hidden;height:28px;margin-bottom:8px" id="rc-barra">
+        <div id="rc-bar-ejec" style="background:var(--navy);transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;font-weight:600"></div>
+        <div id="rc-bar-done" style="background:var(--green);transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;font-weight:600"></div>
+        <div id="rc-bar-prog" style="background:#B8690A;transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#fff;font-weight:600"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:.7rem;color:var(--gray-600)">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green);margin-right:4px"></span>Ejecutado</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--navy);margin-right:4px"></span>En ejecución</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B8690A;margin-right:4px"></span>Programado</span>
+      </div>
+    </div>
+
+    <!-- Mapa resumen + Timeline -->
+    <div class="main-grid" style="margin-bottom:1.2rem">
+      <div class="card">
+        <div class="card-title">Mapa de intervenciones</div>
+        <div id="map-rc" style="height:380px;border-radius:var(--radius-sm);background:#e8ecf0"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:.7rem;color:var(--gray-600)">
+          <span><span style="display:inline-block;width:20px;height:4px;background:#B8690A;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Programado</span>
+          <span><span style="display:inline-block;width:20px;height:4px;background:var(--navy);border-radius:2px;margin-right:4px;vertical-align:middle"></span>En ejecución</span>
+          <span><span style="display:inline-block;width:20px;height:4px;background:var(--green);border-radius:2px;margin-right:4px;vertical-align:middle"></span>Ejecutado</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Timeline de intervenciones</div>
+        <div id="rc-timeline" style="max-height:420px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- Tabla detallada -->
+    <div class="card">
+      <div class="card-title">
+        <span>Detalle de intervenciones</span>
+        <button class="btn btn-sm btn-red" onclick="setView('cronograma')">+ Nueva</button>
+      </div>
+      <div id="rc-tabla" style="overflow-x:auto"></div>
+    </div>
+  </div>
+
+  <!-- ── PUBLICAR ── -->
+  <div id="view-publicar" style="display:none">
+    <div class="hero-strip" style="background:linear-gradient(135deg,#1C2B5E 0%,#243580 60%,#C0392B 100%);margin-bottom:1.5rem">
+      <div>
+        <h2>Publicar datos en GitHub Pages</h2>
+        <p>Sube los baches al repositorio para actualizar el portal público baches-riobamba.html</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Configuración del repositorio</div>
+      <div class="gh-panel">
+        <div class="form-row">
+          <div class="form-group"><label>Usuario u organización GitHub *</label><input id="gh-owner" placeholder="Ej: gadm-riobamba"></div>
+          <div class="form-group"><label>Nombre del repositorio *</label><input id="gh-repo" placeholder="Ej: obras-publicas"></div>
+        </div>
+        <div class="form-group form-full">
+          <label>Token de acceso personal (GitHub PAT) *</label>
+          <input id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <div class="hint">Settings → Developer settings → Personal access tokens → permisos: <strong>repo</strong></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <button class="btn btn-sm" onclick="saveGHConfig()">Guardar configuración</button>
+          <span id="gh-config-status" style="font-size:.72rem;color:var(--green)"></span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:1rem">Publicar datos</div>
+      <div class="gh-panel">
+        <div style="font-size:.82rem;color:var(--navy);margin-bottom:10px">
+          Se subirá <strong id="gh-bache-count">0</strong> baches al archivo
+          <code style="background:var(--off-white);padding:1px 6px;border-radius:4px;font-size:.75rem">baches-data.json</code>
+          del repositorio. El portal <code>baches-riobamba.html</code> se actualizará automáticamente.
+        </div>
+        <div style="font-size:.75rem;color:var(--gray-600);margin-bottom:12px" id="gh-last-pub">Última publicación: nunca</div>
+        <button class="btn btn-primary" onclick="publicarGitHub()" id="gh-pub-btn">↑ Publicar ahora</button>
+        <div id="gh-status"></div>
+      </div>
+
+      <div class="section-title" style="margin-top:1rem">También: exportar JSON local</div>
+      <div class="gh-panel">
+        <p style="font-size:.8rem;color:var(--gray-600);margin-bottom:10px">Descarga el archivo <code>baches-data.json</code> para subirlo manualmente a tu servidor.</p>
+        <button class="btn btn-red" onclick="exportarJSON()">⬇ Descargar baches-data.json</button>
+        <button class="btn" onclick="exportarExcel()" style="margin-left:8px">⬇ Exportar Excel</button>
+      </div>
+      <div class="btn-group"><button class="btn" onclick="setView('dashboard')">Volver</button></div>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:var(--navy);color:var(--gray-400);font-size:.7rem;text-align:center;padding:1.2rem;border-top:3px solid var(--red)">
+  Alcaldía Ciudadana de Riobamba · GADM Riobamba · Dirección de Gestión de Obras Públicas · Sistema de Baches 2025
+</footer>
+
+</div><!-- /main-content -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const ADMIN_USER = 'obras2025';
+const ADMIN_PASS = 'Riobamba@2025';
+const STORAGE_KEY = 'baches_gadm_2025';
+const STORAGE_VER = 'v1_2025';
+
+const SEV_COLOR = { alta:'#C0392B', media:'#B8690A', baja:'#1B7B4E' };
+const SEV_BG    = { alta:'#FDECEA', media:'#FDF3E3', baja:'#E8F5EF' };
+const SEV_LABEL = { alta:'Alta', media:'Media', baja:'Baja' };
+
+// Parroquias de Riobamba — idénticas al portal de obras
+const PARROQUIAS = [
+  {id:'lizarzaburu',name:'Lizarzaburu',color:'#1A5FA0',coords:[[-1.6545,-78.6660],[-1.6545,-78.6490],[-1.6635,-78.6490],[-1.6680,-78.6580],[-1.6650,-78.6680]]},
+  {id:'velasco',name:'Velasco',color:'#1B7B4E',coords:[[-1.6545,-78.6490],[-1.6545,-78.6380],[-1.6650,-78.6380],[-1.6650,-78.6445],[-1.6635,-78.6490]]},
+  {id:'maldonado',name:'Maldonado',color:'#7A4A0A',coords:[[-1.6680,-78.6580],[-1.6635,-78.6490],[-1.6650,-78.6445],[-1.6760,-78.6460],[-1.6750,-78.6600]]},
+  {id:'veloz',name:'Veloz',color:'#2E6B1A',coords:[[-1.6650,-78.6445],[-1.6650,-78.6380],[-1.6780,-78.6380],[-1.6780,-78.6460],[-1.6760,-78.6460]]},
+  {id:'yaruquies',name:'Yaruquíes',color:'#4A2E8A',coords:[[-1.6750,-78.6850],[-1.6750,-78.6600],[-1.6900,-78.6600],[-1.6900,-78.6850]]},
+  {id:'sanluis',name:'San Luis',color:'#854F0B',coords:[[-1.6780,-78.6460],[-1.6780,-78.6280],[-1.6950,-78.6280],[-1.6950,-78.6460]]},
+];
+
+const TILE_URLS = {
+  voyager:    { url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',    attr:'© OpenStreetMap · © CARTO' },
+  esquematico:{ url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',             attr:'© OpenStreetMap · © CARTO' },
+  satelite:   { url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr:'© Esri · Maxar' },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let baches = [];
+let filtroSev = 'todos';
+let filtroTexto = '';
+let chartSev = null, chartSem = null;
+let mapaGeneral = null, mapaParroquias = null;
+let mapaPicker = null, pickerMarker = null;
+let mapaParroquiasPicker = null;
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════════
+function doLogin() {
+  const u = (document.getElementById('login-user').value||'').trim();
+  const p = (document.getElementById('login-pass').value||'').trim();
+  const e = document.getElementById('login-error');
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    sessionStorage.setItem('baches_auth', '1');
+    loadBaches();
+    loadIntervenciones();
+    initPickerMap();
+  } else {
+    e.textContent = 'Usuario o contraseña incorrectos.';
+    document.getElementById('login-pass').value = '';
+    setTimeout(()=>{ e.textContent=''; }, 3000);
+  }
+}
+
+if (sessionStorage.getItem('baches_auth') === '1') {
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    loadBaches();
+    loadIntervenciones();
+    initPickerMap();
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════════════
+function loadBaches() {
+  try {
+    const ver = localStorage.getItem(STORAGE_KEY+'_version');
+    if (ver !== STORAGE_VER) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(STORAGE_KEY+'_version', STORAGE_VER);
+      baches = [];
+    } else {
+      const d = localStorage.getItem(STORAGE_KEY);
+      baches = d ? JSON.parse(d) : [];
+    }
+  } catch(e) { baches = []; }
+  renderAll();
+}
+
+function saveBaches() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(baches)); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function hoy() {
+  return new Date().toLocaleDateString('es-EC',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function isoHoy() {
+  return new Date().toISOString().split('T')[0];
+}
+function normSev(s) {
+  const v = String(s||'').toLowerCase().trim();
+  if (v==='alta'||v==='high') return 'alta';
+  if (v==='media'||v==='medio'||v==='medium') return 'media';
+  return 'baja';
+}
+function isSemana(r) {
+  const v = r.semana||r.esta_semana||r.Semana||'';
+  if (typeof v==='boolean') return v;
+  if (typeof v==='number') return v===1;
+  return ['si','sí','yes','true','1','x'].includes(String(v).toLowerCase().trim());
+}
+function parseLatLng(v) {
+  // Handles both "," and "." as decimal separator
+  return parseFloat(String(v||'').replace(',','.'));
+}
+function showAlert(id, msg, type='ok') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(()=>{ if(el) el.innerHTML=''; }, 4000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════════
+function renderAll() {
+  renderMetrics();
+  renderLista();
+  renderCharts();
+  renderBacheSelect();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// METRICS
+// ═══════════════════════════════════════════════════════════════
+function renderMetrics() {
+  const total  = baches.length;
+  const semana = baches.filter(b=>b.semana).length;
+  const alta   = baches.filter(b=>b.severidad==='alta').length;
+  const media  = baches.filter(b=>b.severidad==='media').length;
+  const baja   = baches.filter(b=>b.severidad==='baja').length;
+  const coords = baches.filter(b=>b.lat&&b.lng).length;
+
+  document.getElementById('mTotal').textContent  = total;
+  document.getElementById('mSemana').textContent = semana;
+  document.getElementById('mAlta').textContent   = alta;
+  document.getElementById('mMedia').textContent  = media;
+  document.getElementById('mBaja').textContent   = baja;
+  document.getElementById('mCoords').textContent = coords;
+  document.getElementById('heroBadge').textContent = total+' bache'+(total!==1?'s':'')+' registrado'+(total!==1?'s':'');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTROS
+// ═══════════════════════════════════════════════════════════════
+function setFiltroSev(el, sev) {
+  filtroSev = sev;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderLista();
+}
+function filtrarBaches() {
+  filtroTexto = (document.getElementById('searchInput').value||'').toLowerCase();
+  renderLista();
+}
+function getBachesFiltrados() {
+  return baches.filter(b=>{
+    const mS = filtroSev==='todos' || (filtroSev==='semana' ? b.semana : b.severidad===filtroSev);
+    const mT = !filtroTexto ||
+      (b.nombre||'').toLowerCase().includes(filtroTexto) ||
+      (b.descripcion||'').toLowerCase().includes(filtroTexto);
+    return mS && mT;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LISTA DE BACHES (tabla expandible, igual a obras)
+// ═══════════════════════════════════════════════════════════════
+function toggleExpandB(idx) {
+  const row   = document.getElementById('bexp-'+idx);
+  const arrow = document.getElementById('barrow-'+idx);
+  const tr    = document.getElementById('brow-'+idx);
+  if (!row) return;
+  const open  = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  arrow.textContent  = open ? '›' : '⌄';
+  tr.classList.toggle('expanded', !open);
+}
+
+function renderLista() {
+  const el = document.getElementById('bachesList');
+  const filtered = getBachesFiltrados();
+  document.getElementById('bachesListTitle').textContent = 'Baches registrados ('+baches.length+')';
+  const rc = document.getElementById('resultsCount');
+  if (rc) rc.textContent = filtered.length !== baches.length ? filtered.length+' resultado'+(filtered.length!==1?'s':'') : '';
+  if (!el) return;
+  if (!filtered.length) {
+    el.innerHTML='<p style="font-size:.78rem;color:var(--gray-400);text-align:center;padding:2rem 0">No se encontraron baches.</p>';
+    return;
+  }
+
+  const rows = filtered.map(b=>{
+    const idx  = baches.indexOf(b);
+    const sev  = b.severidad||'media';
+    const col  = SEV_COLOR[sev];
+    const bg   = SEV_BG[sev];
+    const lbl  = SEV_LABEL[sev];
+    const lat  = b.lat ? parseFloat(b.lat).toFixed(5) : '—';
+    const lng  = b.lng ? parseFloat(b.lng).toFixed(5) : '—';
+    return `
+      <tr onclick="toggleExpandB(${idx})" id="brow-${idx}">
+        <td style="width:20px;color:var(--gray-400);font-size:.75rem;padding:9px 6px" id="barrow-${idx}">›</td>
+        <td class="td-nombre">
+          <span class="td-nombre-txt" title="${b.nombre}">${b.nombre}</span>
+          <div class="td-codigo">${b.fecha||'—'}</div>
+        </td>
+        <td><span class="sev-badge sev-${sev}">${lbl}</span></td>
+        <td style="text-align:center;font-size:.75rem">${b.semana?'<span style="color:var(--green)"><span class="semana-dot"></span>Sí</span>':'<span style="color:var(--gray-400)">No</span>'}</td>
+        <td style="font-size:.72rem;color:var(--gray-400);text-align:right;white-space:nowrap">${lat!=='—'?lat+', '+lng:'Sin coords'}</td>
+      </tr>
+      <tr id="bexp-${idx}" style="display:none">
+        <td colspan="5" style="padding:0">
+          <div class="expand-inner">
+            <div class="expand-grid">
+              <div class="expand-item"><label>Severidad</label><span style="color:${col}">${lbl}</span></div>
+              <div class="expand-item"><label>Fecha registro</label><span>${b.fecha||'—'}</span></div>
+              <div class="expand-item"><label>Esta semana</label><span style="color:${b.semana?'var(--green)':'var(--gray-400)'}">${b.semana?'Sí':'No'}</span></div>
+              <div class="expand-item"><label>Coordenadas</label><span>${lat!=='—'?lat+', '+lng:'Sin coords'}</span></div>
+            </div>
+            ${b.descripcion?`<div class="obs-box" style="border-left-color:${col}">${b.descripcion}</div>`:''}
+            ${b.foto_url?`<div style="margin-top:8px"><a href="${b.foto_url}" target="_blank" style="font-size:.72rem;color:var(--navy);font-weight:500">📷 Ver foto →</a></div>`:''}
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button class="btn btn-sm" onclick="event.stopPropagation();editarBache(${idx});setView('actualizar')">Editar</button>
+              ${b.lat&&b.lng?`<button class="btn btn-sm" onclick="event.stopPropagation();setView('mapa');setTimeout(()=>verEnMapa(${idx}),200)">Ver en mapa</button>`:''}
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `<table class="baches-table">
+    <thead><tr>
+      <th style="width:20px"></th>
+      <th>Nombre / Sector · Fecha</th>
+      <th>Severidad</th>
+      <th style="text-align:center">Esta semana</th>
+      <th class="th-right">Coordenadas</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════════
+function renderCharts() {
+  if (chartSev) { chartSev.destroy(); chartSev=null; }
+  if (chartSem) { chartSem.destroy(); chartSem=null; }
+
+  // Donut severidad
+  chartSev = new Chart(document.getElementById('chartSev'), {
+    type:'doughnut',
+    data:{
+      labels:['Alta','Media','Baja'],
+      datasets:[{ data:[
+        baches.filter(b=>b.severidad==='alta').length,
+        baches.filter(b=>b.severidad==='media').length,
+        baches.filter(b=>b.severidad==='baja').length,
+      ], backgroundColor:['#C0392B','#B8690A','#1B7B4E'], borderWidth:0, hoverOffset:4 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ font:{size:10}, color:'#5C5850', boxWidth:10, padding:10 } } } }
+  });
+
+  // Bar semanal — agrupar por semana ISO
+  const semMap = {};
+  baches.forEach(b=>{
+    const d = b.fecha_iso || b.fecha || '';
+    if (!d) return;
+    // Parse date
+    let dt;
+    try {
+      // Try ISO first, then dd/mm/yyyy
+      if (/^\d{4}-\d{2}-\d{2}/.test(d)) dt = new Date(d);
+      else {
+        const parts = d.split('/');
+        if (parts.length===3) dt = new Date(parts[2]+'-'+parts[1].padStart(2,'0')+'-'+parts[0].padStart(2,'0'));
+      }
+      if (!dt || isNaN(dt)) return;
+      // ISO week
+      const tmp = new Date(dt); tmp.setHours(0,0,0,0);
+      tmp.setDate(tmp.getDate()+4-(tmp.getDay()||7));
+      const yearStart = new Date(tmp.getFullYear(),0,1);
+      const week = Math.ceil(((tmp-yearStart)/86400000+1)/7);
+      const key = dt.getFullYear()+'W'+String(week).padStart(2,'0');
+      semMap[key] = (semMap[key]||0)+1;
+    } catch(_){}
+  });
+  const semKeys = Object.keys(semMap).sort().slice(-8);
+  const semVals = semKeys.map(k=>semMap[k]);
+
+  chartSem = new Chart(document.getElementById('chartSem'),{
+    type:'bar',
+    data:{
+      labels: semKeys.map(k=>k.replace('W','·S')),
+      datasets:[{ label:'Baches', data:semVals, backgroundColor:'rgba(192,57,43,0.75)', borderRadius:4 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#8A8579'}, grid:{display:false} },
+        y:{ beginAtZero:true, ticks:{stepSize:1,font:{size:10},color:'#8A8579'}, grid:{color:'rgba(0,0,0,0.05)'} }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NUEVO BACHE
+// ═══════════════════════════════════════════════════════════════
+function previewCoord() {
+  const lat = parseFloat(document.getElementById('f-lat').value);
+  const lng = parseFloat(document.getElementById('f-lng').value);
+  const el  = document.getElementById('coord-preview');
+  if (!isNaN(lat)&&!isNaN(lng)) {
+    el.textContent = `Lat: ${lat.toFixed(6)} · Lng: ${lng.toFixed(6)} ✓`;
+    if (pickerMarker) pickerMarker.setLatLng([lat,lng]);
+    else if (mapaPicker) {
+      pickerMarker = L.marker([lat,lng],{draggable:true}).addTo(mapaPicker);
+      pickerMarker.on('dragend',e=>{
+        const p=e.target.getLatLng();
+        document.getElementById('f-lat').value=p.lat.toFixed(6);
+        document.getElementById('f-lng').value=p.lng.toFixed(6);
+        previewCoord();
+      });
+    }
+  } else { el.textContent=''; }
+}
+
+function guardarBache() {
+  const nombre = (document.getElementById('f-nombre').value||'').trim();
+  const sev    = document.getElementById('f-sev').value;
+  if (!nombre||!sev) { showAlert('form-alert','Completa los campos obligatorios (*)','warn'); return; }
+  const lat = parseFloat(document.getElementById('f-lat').value);
+  const lng = parseFloat(document.getElementById('f-lng').value);
+  const fechaRaw = document.getElementById('f-fecha').value || isoHoy();
+  baches.push({
+    id: Date.now(),
+    nombre,
+    severidad: sev,
+    fecha:     fechaRaw ? fechaRaw.split('-').reverse().join('/') : hoy(),
+    fecha_iso: fechaRaw || isoHoy(),
+    semana:    document.getElementById('f-semana').value === 'si',
+    descripcion: (document.getElementById('f-desc').value||'').trim(),
+    foto_url:  (document.getElementById('f-foto').value||'').trim(),
+    lat:       isNaN(lat) ? null : lat,
+    lng:       isNaN(lng) ? null : lng,
+    historial: [{ fecha:hoy(), nota:'Bache registrado', sev }]
+  });
+  saveBaches(); renderAll(); limpiarFormB();
+  showAlert('form-alert','Bache "'+nombre+'" guardado correctamente.');
+}
+
+function limpiarFormB() {
+  ['f-nombre','f-desc','f-foto','f-lat','f-lng'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-sev').value='';
+  document.getElementById('f-semana').value='';
+  document.getElementById('f-fecha').value='';
+  document.getElementById('coord-preview').textContent='';
+  if (pickerMarker&&mapaPicker) { mapaPicker.removeLayer(pickerMarker); pickerMarker=null; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTUALIZAR
+// ═══════════════════════════════════════════════════════════════
+function renderBacheSelect() {
+  const sel = document.getElementById('upd-bache');
+  const val = sel.value;
+  sel.innerHTML = '<option value="">-- Seleccionar bache --</option>' +
+    baches.map((b,i)=>`<option value="${i}">${b.nombre} · ${SEV_LABEL[b.severidad]||'—'} · ${b.fecha||'—'}</option>`).join('');
+  if (val!=='') sel.value = val;
+}
+
+function onBacheSelect() {
+  const i = parseInt(document.getElementById('upd-bache').value);
+  const form = document.getElementById('upd-form');
+  const hist = document.getElementById('upd-historial');
+  if (isNaN(i)||i<0) { form.style.display='none'; hist.innerHTML=''; return; }
+  const b = baches[i];
+  form.style.display = 'block';
+  document.getElementById('upd-nombre').value = b.nombre||'';
+  document.getElementById('upd-sev').value    = b.severidad||'media';
+  document.getElementById('upd-fecha').value  = b.fecha_iso||'';
+  document.getElementById('upd-semana').value = b.semana ? 'si' : '';
+  document.getElementById('upd-desc').value   = b.descripcion||'';
+  document.getElementById('upd-foto').value   = b.foto_url||'';
+  document.getElementById('upd-lat').value    = b.lat!=null ? b.lat : '';
+  document.getElementById('upd-lng').value    = b.lng!=null ? b.lng : '';
+  document.getElementById('upd-nota').value   = '';
+  const h = (b.historial||[]).slice().reverse().slice(0,5);
+  hist.innerHTML = h.length ? `<div class="sep"></div><div style="font-size:.7rem;font-weight:500;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Últimas actualizaciones</div>`+
+    h.map(e=>`<div class="hist-row"><div class="hist-date">${e.fecha}</div><div class="hist-nota">${e.nota||'—'}</div><div class="hist-sev sev-${e.sev||'media'}">${SEV_LABEL[e.sev]||'—'}</div></div>`).join('')
+    : '';
+}
+
+function editarBache(i) {
+  setView('actualizar');
+  setTimeout(()=>{
+    document.getElementById('upd-bache').value = i;
+    onBacheSelect();
+  },50);
+}
+
+function actualizarBache() {
+  const i = parseInt(document.getElementById('upd-bache').value);
+  if (isNaN(i)) { showAlert('upd-alert','Selecciona un bache primero.','warn'); return; }
+  const b = baches[i];
+  const nsev  = document.getElementById('upd-sev').value;
+  const nota  = (document.getElementById('upd-nota').value||'').trim()||'Actualización';
+  const fechaRaw = document.getElementById('upd-fecha').value || b.fecha_iso || isoHoy();
+  b.nombre      = (document.getElementById('upd-nombre').value||'').trim()||b.nombre;
+  b.severidad   = nsev;
+  b.fecha       = fechaRaw.split('-').reverse().join('/');
+  b.fecha_iso   = fechaRaw;
+  b.semana      = document.getElementById('upd-semana').value === 'si';
+  b.descripcion = (document.getElementById('upd-desc').value||'').trim();
+  b.foto_url    = (document.getElementById('upd-foto').value||'').trim();
+  const lat = parseFloat(document.getElementById('upd-lat').value);
+  const lng = parseFloat(document.getElementById('upd-lng').value);
+  b.lat = isNaN(lat) ? b.lat : lat;
+  b.lng = isNaN(lng) ? b.lng : lng;
+  if (!b.historial) b.historial=[];
+  b.historial.push({ fecha:hoy(), nota, sev:nsev });
+  saveBaches(); renderAll(); onBacheSelect();
+  showAlert('upd-alert','"'+b.nombre+'" actualizado correctamente.');
+}
+
+function eliminarBache() {
+  const i = parseInt(document.getElementById('upd-bache').value);
+  if (isNaN(i)) return;
+  if (!confirm('¿Eliminar "'+baches[i].nombre+'"? No se puede deshacer.')) return;
+  const nombre = baches[i].nombre;
+  baches.splice(i,1);
+  saveBaches(); renderAll();
+  document.getElementById('upd-form').style.display='none';
+  document.getElementById('upd-historial').innerHTML='';
+  document.getElementById('upd-bache').value='';
+  showAlert('upd-alert','"'+nombre+'" eliminado.','warn');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAPA PICKER (en formulario nuevo bache)
+// ═══════════════════════════════════════════════════════════════
+function initPickerMap() {
+  if (mapaPicker) return;
+  setTimeout(()=>{
+    try {
+      mapaPicker = L.map('map-coord-picker',{center:[-1.6720,-78.6540],zoom:14});
+      L.tileLayer(TILE_URLS.voyager.url,{attribution:TILE_URLS.voyager.attr,maxZoom:19}).addTo(mapaPicker);
+      // Draw parroquias
+      PARROQUIAS.forEach(p=>{
+        L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.9,dashArray:'5 4',fillColor:p.color,fillOpacity:.07,interactive:false}).addTo(mapaPicker);
+        const lats=p.coords.map(c=>c[0]),lngs=p.coords.map(c=>c[1]);
+        const cLat=lats.reduce((a,b)=>a+b,0)/lats.length, cLng=lngs.reduce((a,b)=>a+b,0)/lngs.length;
+        L.marker([cLat,cLng],{icon:L.divIcon({className:'parr-label-icon',html:`<div class="parr-label" style="color:${p.color}">${p.name}</div>`,iconSize:[120,20],iconAnchor:[60,10]}),interactive:false}).addTo(mapaPicker);
+      });
+      mapaPicker.on('click',e=>{
+        const {lat,lng} = e.latlng;
+        document.getElementById('f-lat').value = lat.toFixed(6);
+        document.getElementById('f-lng').value = lng.toFixed(6);
+        if (pickerMarker) pickerMarker.setLatLng([lat,lng]);
+        else {
+          pickerMarker = L.circleMarker([lat,lng],{radius:10,fillColor:'#C0392B',color:'#fff',weight:3,fillOpacity:1}).addTo(mapaPicker);
+        }
+        previewCoord();
+      });
+    } catch(e){ console.warn('picker map error',e); }
+  },300);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAPA GENERAL (parroquias + pins de baches)
+// ═══════════════════════════════════════════════════════════════
+function renderMapaGeneral() {
+  if (mapaGeneral) { mapaGeneral.remove(); mapaGeneral=null; }
+  mapaGeneral = L.map('map-general',{center:[-1.6720,-78.6540],zoom:14});
+  L.tileLayer(TILE_URLS.voyager.url,{attribution:TILE_URLS.voyager.attr,maxZoom:19}).addTo(mapaGeneral);
+
+  // Parroquias
+  PARROQUIAS.forEach(p=>{
+    L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.9,dashArray:'5 4',fillColor:p.color,fillOpacity:.07,interactive:false}).addTo(mapaGeneral);
+    const lats=p.coords.map(c=>c[0]),lngs=p.coords.map(c=>c[1]);
+    const cLat=lats.reduce((a,b)=>a+b,0)/lats.length, cLng=lngs.reduce((a,b)=>a+b,0)/lngs.length;
+    L.marker([cLat,cLng],{icon:L.divIcon({className:'parr-label-icon',html:`<div class="parr-label" style="color:${p.color}">${p.name}</div>`,iconSize:[120,20],iconAnchor:[60,10]}),interactive:false}).addTo(mapaGeneral);
+  });
+
+  const conCoords = baches.filter(b=>b.lat!=null&&b.lng!=null);
+  document.getElementById('mapa-count').textContent = conCoords.length+' bache'+(conCoords.length!==1?'s':'')+' georreferenciado'+(conCoords.length!==1?'s':'');
+
+  const bounds = [];
+  conCoords.forEach((b,i)=>{
+    const lat = parseFloat(b.lat), lng = parseFloat(b.lng);
+    if (isNaN(lat)||isNaN(lng)) return;
+    bounds.push([lat,lng]);
+    const color = SEV_COLOR[b.severidad||'media'];
+    const icon = L.divIcon({
+      className:'',
+      html:`<div style="width:32px;height:32px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px">🕳️</div>`,
+      iconSize:[32,32],iconAnchor:[16,16],popupAnchor:[0,-18]
+    });
+    const idx = baches.indexOf(b);
+    L.marker([lat,lng],{icon}).addTo(mapaGeneral).bindPopup(`
+      <div class="popup-title">${b.nombre}</div>
+      <div class="popup-row"><span>Severidad</span><strong style="color:${color}">${SEV_LABEL[b.severidad||'media']}</strong></div>
+      <div class="popup-row"><span>Fecha</span><span>${b.fecha||'—'}</span></div>
+      <div class="popup-row"><span>Esta semana</span><span style="color:${b.semana?'var(--green)':'var(--gray-400)'}">${b.semana?'Sí':'No'}</span></div>
+      ${b.descripcion?`<div style="margin-top:6px;font-size:.7rem;color:var(--gray-600)">${b.descripcion}</div>`:''}
+      <div style="margin-top:8px;text-align:right"><a href="#" onclick="event.preventDefault();editarBache(${idx});setView('actualizar')" style="font-size:.72rem;color:var(--navy);font-weight:500">Editar →</a></div>
+    `,{maxWidth:240});
+  });
+
+  if (bounds.length) mapaGeneral.fitBounds(bounds,{padding:[40,40],maxZoom:14});
+}
+
+function verEnMapa(idx) {
+  const b = baches[idx];
+  if (!b||b.lat==null) return;
+  if (mapaGeneral) {
+    mapaGeneral.flyTo([parseFloat(b.lat),parseFloat(b.lng)],17,{duration:.7});
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORTAR CSV / EXCEL
+// ═══════════════════════════════════════════════════════════════
+function importFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const modeEl = document.querySelector('input[name="import-mode"]:checked');
+  const mode = modeEl ? modeEl.value : 'skip';
+
+  const process = (rows) => {
+    let nNew=0,nUpd=0,nSkip=0;
+    if (mode==='replace') baches=[];
+    rows.forEach((r,idx)=>{
+      // Support both array (PapaParse no header) and object (xlsx)
+      let nombre, lat, lng, sev, fecha, semana, desc, foto;
+      if (Array.isArray(r)) {
+        // csv sin encabezado numérico detectado en baches.csv: id;lat;lng;sev;fecha;semana
+        // o con encabezado: nombre, lat, lng, severidad, fecha, semana, descripcion, foto_url
+        if (idx===0 && isNaN(parseLatLng(r[1]))) return; // skip header
+        // Try detect format: if first col is numeric → id;lat;lng... else nombre;lat...
+        const firstIsNum = !isNaN(parseLatLng(r[0]));
+        if (firstIsNum) {
+          nombre = 'Bache #'+(idx+1);
+          lat=parseLatLng(r[1]); lng=parseLatLng(r[2]);
+          sev=normSev(r[3]); fecha=String(r[4]||''); semana=r[5]; desc=''; foto='';
+        } else {
+          nombre=String(r[0]||'').trim();
+          lat=parseLatLng(r[1]); lng=parseLatLng(r[2]);
+          sev=normSev(r[3]); fecha=String(r[4]||''); semana=r[5];
+          desc=String(r[6]||'').trim(); foto=String(r[7]||'').trim();
+        }
+      } else {
+        nombre = String(r.nombre||r.Nombre||r.name||'').trim() || 'Bache #'+(idx+1);
+        lat  = parseLatLng(r.lat||r.Lat||r.latitude||r.Latitud||0);
+        lng  = parseLatLng(r.lng||r.Lng||r.lon||r.longitude||r.Longitud||0);
+        sev  = normSev(r.severidad||r.Severidad||r.severity||'');
+        fecha= String(r.fecha||r.Fecha||r.date||'');
+        semana=r.semana||r.Semana||r.esta_semana||'';
+        desc = String(r.descripcion||r.Descripcion||r.description||'').trim();
+        foto = String(r.foto_url||r.foto||r.Foto||'').trim();
+      }
+      if (!nombre) return;
+
+      // Normalise fecha
+      let fecha_iso = '';
+      if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) fecha_iso=fecha;
+      else if (/^\d{2}\/\d{2}\/\d{4}/.test(fecha)) {
+        const p=fecha.split('/'); fecha_iso=p[2]+'-'+p[1]+'-'+p[0];
+      }
+
+      const semBool = ['si','sí','yes','true','1','x'].includes(String(semana).toLowerCase().trim()) || semana===true || semana===1;
+      const latN = isNaN(lat)||lat===0?null:lat;
+      const lngN = isNaN(lng)||lng===0?null:lng;
+
+      const nueva = { id:Date.now()+idx, nombre, severidad:sev,
+        fecha:fecha_iso?fecha_iso.split('-').reverse().join('/'):fecha||hoy(),
+        fecha_iso:fecha_iso||isoHoy(),
+        semana:semBool, descripcion:desc, foto_url:foto,
+        lat:latN, lng:lngN,
+        historial:[{fecha:hoy(),nota:'Importado desde archivo',sev}]
+      };
+
+      const dupIdx = baches.findIndex(b=>b.nombre.toLowerCase()===nombre.toLowerCase());
+      if (dupIdx===-1) { baches.push(nueva); nNew++; }
+      else if (mode==='update') { const hist=baches[dupIdx].historial||[]; hist.push({fecha:hoy(),nota:'Actualizado desde archivo',sev}); baches[dupIdx]=Object.assign({},baches[dupIdx],nueva,{historial:hist}); nUpd++; }
+      else { nSkip++; }
+    });
+    saveBaches(); renderAll();
+    const parts=[];
+    if (nNew>0) parts.push(`<strong>${nNew}</strong> nuevos`);
+    if (nUpd>0) parts.push(`<strong>${nUpd}</strong> actualizados`);
+    if (nSkip>0) parts.push(`<strong>${nSkip}</strong> ignorados`);
+    document.getElementById('import-alert').innerHTML=`<div class="alert alert-ok">Importación completada: ${parts.join(' · ')}</div>`;
+    setTimeout(()=>{ const el=document.getElementById('import-alert'); if(el) el.innerHTML=''; },5000);
+    event.target.value='';
+  };
+
+  if (ext==='csv') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const txt = e.target.result;
+      const sep = txt.split('\n')[0].includes(';') ? ';' : ',';
+      Papa.parse(txt,{header:false,skipEmptyLines:true,delimiter:sep,complete:r=>process(r.data),error:()=>{
+        document.getElementById('import-alert').innerHTML='<div class="alert alert-warn">Error al leer CSV.</div>';
+      }});
+    };
+    reader.readAsText(file,'UTF-8');
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result,{type:'binary'});
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+        process(rows);
+      } catch(err) { document.getElementById('import-alert').innerHTML='<div class="alert alert-warn">Error al leer Excel: '+err.message+'</div>'; }
+    };
+    reader.readAsBinaryString(file);
+  }
+}
+
+function downloadTemplate() {
+  const rows = ['nombre,lat,lng,severidad,fecha,semana,descripcion,foto_url',
+    'Av. Daniel León Borja frente #120,-1.671234,-78.647890,alta,2025-04-01,si,Bache profundo frente a semáforo. Riesgo alto.,',
+    'Calle Guayaquil y España,-1.665432,-78.641234,media,2025-04-03,no,Bache mediano. Pavimento deteriorado.,',
+    'Av. La Prensa barrio El Álamo,-1.680000,-78.652000,baja,2025-04-05,si,Fisura superficial. Programado.,',
+  ].join('\n');
+  const blob = new Blob(['\uFEFF'+rows],{type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='plantilla_baches.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR
+// ═══════════════════════════════════════════════════════════════
+function exportarJSON() {
+  const datos = buildPublishData();
+  const blob = new Blob([JSON.stringify(datos,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='baches-data.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+function exportarExcel() {
+  const rows = baches.map(b=>({
+    nombre:b.nombre, severidad:b.severidad||'',
+    fecha:b.fecha||'', semana:b.semana?'si':'no',
+    lat:b.lat||'', lng:b.lng||'',
+    descripcion:b.descripcion||'', foto_url:b.foto_url||''
+  }));
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb,'Baches',ws);
+  XLSX.writeFile(wb,'baches_riobamba.xlsx');
+}
+
+function buildPublishData() {
+  return {
+    version:'1.0',
+    actualizado:isoHoy(),
+    entidad:'GADM Riobamba',
+    total:baches.length,
+    semana:baches.filter(b=>b.semana).length,
+    cronograma: intervenciones.map(i=>({
+      nombre:i.nombre||'',
+      estado:i.estado||'programado',
+      fecha_ini:i.fecha_ini||'',
+      fecha_fin:i.fecha_fin||'',
+      observaciones:i.obs||'',
+      puntos:i.puntos||[]
+    })),
+    baches:baches.map(b=>({
+      nombre:b.nombre||'',
+      severidad:b.severidad||'media',
+      fecha:b.fecha||'',
+      semana:!!b.semana,
+      descripcion:b.descripcion||'',
+      foto_url:b.foto_url||'',
+      lat:b.lat!=null?parseFloat(b.lat):null,
+      lng:b.lng!=null?parseFloat(b.lng):null
+    }))
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GITHUB PUBLISH
+// ═══════════════════════════════════════════════════════════════
+function saveGHConfig() {
+  const owner = document.getElementById('gh-owner').value.trim();
+  const repo  = document.getElementById('gh-repo').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  if (!owner||!repo||!token) { alert('Completa todos los campos'); return; }
+  localStorage.setItem('gh_b_owner',owner);
+  localStorage.setItem('gh_b_repo',repo);
+  localStorage.setItem('gh_b_token',btoa(token));
+  const s = document.getElementById('gh-config-status');
+  s.textContent='✓ Guardado'; setTimeout(()=>{ s.textContent=''; },3000);
+}
+
+function initPublicar() {
+  const owner = localStorage.getItem('gh_b_owner')||'';
+  const repo  = localStorage.getItem('gh_b_repo')||'';
+  const token = localStorage.getItem('gh_b_token') ? atob(localStorage.getItem('gh_b_token')) : '';
+  if (document.getElementById('gh-owner')) document.getElementById('gh-owner').value=owner;
+  if (document.getElementById('gh-repo'))  document.getElementById('gh-repo').value=repo;
+  if (document.getElementById('gh-token')) document.getElementById('gh-token').value=token;
+  const ce = document.getElementById('gh-bache-count'); if(ce) ce.textContent=baches.length;
+  const lp = localStorage.getItem('gh_b_last_pub');
+  const le = document.getElementById('gh-last-pub'); if(le) le.textContent='Última publicación: '+(lp||'nunca');
+}
+
+async function publicarGitHub() {
+  const owner = document.getElementById('gh-owner').value.trim();
+  const repo  = document.getElementById('gh-repo').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  const statusEl = document.getElementById('gh-status');
+  const btn = document.getElementById('gh-pub-btn');
+  if (!owner||!repo||!token) { statusEl.innerHTML='<div class="gh-status gh-err">Completa la configuración.</div>'; return; }
+  btn.disabled=true;
+  statusEl.innerHTML='<div class="gh-status gh-info"><span class="gh-spinner"></span>Conectando...</div>';
+  try {
+    const datos = buildPublishData();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(datos,null,2))));
+    const apiUrl  = `https://api.github.com/repos/${owner}/${repo}/contents/baches-data.json`;
+    const headers = {'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};
+    statusEl.innerHTML='<div class="gh-status gh-info"><span class="gh-spinner"></span>Verificando archivo...</div>';
+    let sha=null;
+    try { const r=await fetch(apiUrl,{headers}); if(r.ok){const d=await r.json();sha=d.sha;} } catch(_){}
+    statusEl.innerHTML='<div class="gh-status gh-info"><span class="gh-spinner"></span>Subiendo '+baches.length+' baches...</div>';
+    const body={message:'Actualización baches · '+isoHoy(),content};
+    if(sha) body.sha=sha;
+    const putRes = await fetch(apiUrl,{method:'PUT',headers,body:JSON.stringify(body)});
+    if (putRes.ok) {
+      const ts=new Date().toLocaleString('es-EC');
+      localStorage.setItem('gh_b_last_pub',ts);
+      document.getElementById('gh-last-pub').textContent='Última publicación: '+ts;
+      statusEl.innerHTML=`<div class="gh-status gh-ok">✓ ${baches.length} baches publicados · ${ts}<br>URL: <a href="https://${owner}.github.io/${repo}/" target="_blank" style="color:var(--green);font-weight:500">https://${owner}.github.io/${repo}/</a></div>`;
+    } else {
+      const err=await putRes.json();
+      statusEl.innerHTML=`<div class="gh-status gh-err">Error GitHub: ${err.message||putRes.status}</div>`;
+    }
+  } catch(e) { statusEl.innerHTML=`<div class="gh-status gh-err">Error de red: ${e.message}</div>`; }
+  btn.disabled=false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VISTAS
+// ═══════════════════════════════════════════════════════════════
+function setView(v) {
+  ['dashboard','mapa','nuevo','actualizar','importar','publicar','cronograma','resumen-cron'].forEach(k=>{
+    document.getElementById('view-'+k).style.display = k===v?'block':'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'"+v+"'"));
+  });
+  if (v==='actualizar')   renderBacheSelect();
+  if (v==='publicar')     initPublicar();
+  if (v==='nuevo')        { setTimeout(()=>{ if(mapaPicker) mapaPicker.invalidateSize(); },300); }
+  if (v==='mapa')         { setTimeout(renderMapaGeneral,100); }
+  if (v==='cronograma')   { setTimeout(initCronMap,200); renderCronLista(); }
+  if (v==='resumen-cron') { setTimeout(renderResumenCron,150); }
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CRONOGRAMA
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_CRON = 'cron_gadm_2025';
+let intervenciones = [];
+let mapaCron = null, cronPolyline = null, cronMarkers = [], cronPuntos = [];
+let filtroCron = 'todos';
+let editCronIdx = -1;
+
+const ESTADO_CFG = {
+  programado:{ label:'Programado',  color:'#B8690A', bg:'#FDF3E3', icon:'🕐' },
+  ejecucion: { label:'En ejecución',color:'#1C2B5E', bg:'#E8EBFA', icon:'🚧' },
+  ejecutado: { label:'Ejecutado',   color:'#1B7B4E', bg:'#E8F5EF', icon:'✅' },
+};
+
+function loadIntervenciones() {
+  try { const d=localStorage.getItem(STORAGE_CRON); intervenciones=d?JSON.parse(d):[]; } catch(e){ intervenciones=[]; }
+}
+function saveIntervenciones() {
+  try { localStorage.setItem(STORAGE_CRON,JSON.stringify(intervenciones)); } catch(e){}
+}
+
+function initCronMap() {
+  if (mapaCron) { mapaCron.invalidateSize(); return; }
+  mapaCron = L.map('map-cron-picker',{center:[-1.6720,-78.6540],zoom:14});
+  L.tileLayer(TILE_URLS.voyager.url,{attribution:TILE_URLS.voyager.attr,maxZoom:19}).addTo(mapaCron);
+  PARROQUIAS.forEach(p=>{
+    L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.9,dashArray:'5 4',fillColor:p.color,fillOpacity:.07,interactive:false}).addTo(mapaCron);
+    const lats=p.coords.map(c=>c[0]),lngs=p.coords.map(c=>c[1]);
+    const cLat=lats.reduce((a,b)=>a+b,0)/lats.length, cLng=lngs.reduce((a,b)=>a+b,0)/lngs.length;
+    L.marker([cLat,cLng],{icon:L.divIcon({className:'parr-label-icon',html:`<div class="parr-label" style="color:${p.color}">${p.name}</div>`,iconSize:[120,20],iconAnchor:[60,10]}),interactive:false}).addTo(mapaCron);
+  });
+  mapaCron.on('click', e=>{
+    const {lat,lng} = e.latlng;
+    cronPuntos.push([parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6))]);
+    // Add small marker
+    const m = L.circleMarker([lat,lng],{radius:6,fillColor:'#1B7B4E',color:'#fff',weight:2,fillOpacity:1}).addTo(mapaCron);
+    cronMarkers.push(m);
+    // Update or create polyline
+    if (cronPolyline) mapaCron.removeLayer(cronPolyline);
+    if (cronPuntos.length>1) {
+      cronPolyline = L.polyline(cronPuntos,{color:'#1B7B4E',weight:4,opacity:.85,dashArray:'8 4'}).addTo(mapaCron);
+    }
+    actualizarContadorPuntos();
+  });
+}
+
+function actualizarContadorPuntos() {
+  const el = document.getElementById('cr-puntos-count');
+  const list = document.getElementById('cr-puntos-list');
+  if (el) el.textContent = cronPuntos.length;
+  if (list) list.textContent = cronPuntos.map((p,i)=>`P${i+1}: ${p[0]}, ${p[1]}`).join(' · ');
+}
+
+function limpiarTrazado() {
+  cronPuntos = [];
+  cronMarkers.forEach(m=>{ if(mapaCron) mapaCron.removeLayer(m); });
+  cronMarkers = [];
+  if (cronPolyline&&mapaCron) { mapaCron.removeLayer(cronPolyline); cronPolyline=null; }
+  actualizarContadorPuntos();
+}
+
+function limpiarFormCron() {
+  ['cr-nombre','cr-obs'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('cr-fecha-ini').value='';
+  document.getElementById('cr-fecha-fin').value='';
+  document.getElementById('cr-estado').value='programado';
+  limpiarTrazado();
+  editCronIdx = -1;
+  const st = document.getElementById('cron-alert');
+  if(st) st.innerHTML='';
+}
+
+function guardarIntervencion() {
+  const nombre = (document.getElementById('cr-nombre').value||'').trim();
+  const estado = document.getElementById('cr-estado').value;
+  const fechaIni = document.getElementById('cr-fecha-ini').value;
+  if (!nombre||!fechaIni) { showAlert('cron-alert','Completa nombre y fecha de inicio (*)','warn'); return; }
+  if (cronPuntos.length<2) { showAlert('cron-alert','Marca al menos 2 puntos en el mapa para definir la vía','warn'); return; }
+  const item = {
+    id: editCronIdx>=0 ? intervenciones[editCronIdx].id : Date.now(),
+    nombre,
+    estado,
+    fecha_ini: fechaIni,
+    fecha_fin: document.getElementById('cr-fecha-fin').value||'',
+    obs: (document.getElementById('cr-obs').value||'').trim(),
+    puntos: [...cronPuntos],
+    creado: hoy()
+  };
+  if (editCronIdx>=0) { intervenciones[editCronIdx]=item; }
+  else { intervenciones.push(item); }
+  saveIntervenciones(); renderCronLista(); limpiarFormCron();
+  showAlert('cron-alert','"'+nombre+'" guardada correctamente.');
+}
+
+function setFiltroCron(el, f) {
+  filtroCron=f;
+  document.querySelectorAll('#view-cronograma .filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderCronLista();
+}
+
+function editarIntervencion(idx) {
+  const i = intervenciones[idx];
+  if(!i) return;
+  document.getElementById('cr-nombre').value   = i.nombre||'';
+  document.getElementById('cr-estado').value   = i.estado||'programado';
+  document.getElementById('cr-fecha-ini').value= i.fecha_ini||'';
+  document.getElementById('cr-fecha-fin').value= i.fecha_fin||'';
+  document.getElementById('cr-obs').value      = i.obs||'';
+  // Restore trazado
+  limpiarTrazado();
+  if (i.puntos&&i.puntos.length) {
+    i.puntos.forEach(p=>{
+      cronPuntos.push(p);
+      const m=L.circleMarker(p,{radius:6,fillColor:'#1B7B4E',color:'#fff',weight:2,fillOpacity:1}).addTo(mapaCron);
+      cronMarkers.push(m);
+    });
+    if (cronPuntos.length>1) {
+      cronPolyline=L.polyline(cronPuntos,{color:'#1B7B4E',weight:4,opacity:.85,dashArray:'8 4'}).addTo(mapaCron);
+      mapaCron.fitBounds(cronPolyline.getBounds().pad(.2));
+    }
+    actualizarContadorPuntos();
+  }
+  editCronIdx=idx;
+  window.scrollTo(0,0);
+}
+
+function eliminarIntervencion(idx) {
+  const nombre = intervenciones[idx]?.nombre||'';
+  if (!confirm('¿Eliminar "'+nombre+'"?')) return;
+  intervenciones.splice(idx,1);
+  saveIntervenciones(); renderCronLista();
+}
+
+function renderCronLista() {
+  const el = document.getElementById('cron-lista');
+  const title = document.getElementById('cron-list-title');
+  if (!el) return;
+  const filtered = filtroCron==='todos' ? intervenciones : intervenciones.filter(i=>i.estado===filtroCron);
+  if (title) title.textContent='Intervenciones registradas ('+intervenciones.length+')';
+  if (!filtered.length) {
+    el.innerHTML='<p style="font-size:.78rem;color:var(--gray-400);text-align:center;padding:2rem 0">No hay intervenciones registradas.</p>';
+    return;
+  }
+  el.innerHTML = filtered.map((i,fi)=>{
+    const idx = intervenciones.indexOf(i);
+    const cfg = ESTADO_CFG[i.estado]||ESTADO_CFG.programado;
+    return `<div style="border:1px solid var(--gray-100);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;background:#fff">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:20px;background:${cfg.bg};color:${cfg.color}">${cfg.icon} ${cfg.label}</span>
+            <span style="font-size:.7rem;color:var(--gray-400)">${i.puntos?.length||0} puntos de traza</span>
+          </div>
+          <div style="font-weight:500;color:var(--navy);font-size:.85rem;margin-bottom:3px">${i.nombre}</div>
+          <div style="font-size:.72rem;color:var(--gray-500)">
+            Inicio: <strong>${i.fecha_ini||'—'}</strong>
+            ${i.fecha_fin?` · Fin estimado: <strong>${i.fecha_fin}</strong>`:''}
+          </div>
+          ${i.obs?`<div style="font-size:.72rem;color:var(--gray-600);margin-top:4px;border-left:3px solid ${cfg.color};padding-left:7px;background:${cfg.bg};border-radius:0 4px 4px 0;padding:4px 8px">${i.obs}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="setView('cronograma');setTimeout(()=>editarIntervencion(${idx}),250)">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarIntervencion(${idx})">Eliminar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESUMEN CRONOGRAMA
+// ═══════════════════════════════════════════════════════════════
+let mapaRC = null, rcLayers = [];
+
+function renderResumenCron() {
+  const total = intervenciones.length;
+  const prog  = intervenciones.filter(i=>i.estado==='programado').length;
+  const ejec  = intervenciones.filter(i=>i.estado==='ejecucion').length;
+  const done  = intervenciones.filter(i=>i.estado==='ejecutado').length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+
+  document.getElementById('rc-prog').textContent = prog;
+  document.getElementById('rc-ejec').textContent = ejec;
+  document.getElementById('rc-done').textContent = done;
+  document.getElementById('rc-pct').textContent  = pct+'%';
+
+  // Barra proporcional
+  const pDone = total ? (done/total*100).toFixed(1) : 0;
+  const pEjec = total ? (ejec/total*100).toFixed(1) : 0;
+  const pProg = total ? (prog/total*100).toFixed(1) : 0;
+  const bd = document.getElementById('rc-bar-done');
+  const be = document.getElementById('rc-bar-ejec');
+  const bp = document.getElementById('rc-bar-prog');
+  bd.style.width = pDone+'%'; if(pDone>5) bd.textContent=pDone+'%';
+  be.style.width = pEjec+'%'; if(pEjec>5) be.textContent=pEjec+'%';
+  bp.style.width = pProg+'%'; if(pProg>5) bp.textContent=pProg+'%';
+
+  // Mapa
+  initMapaRC();
+
+  // Timeline
+  renderTimeline();
+
+  // Tabla
+  renderTablaRC();
+}
+
+function initMapaRC() {
+  if (!mapaRC) {
+    mapaRC = L.map('map-rc',{center:[-1.6720,-78.6540],zoom:14});
+    L.tileLayer(TILE_URLS.voyager.url,{attribution:TILE_URLS.voyager.attr,maxZoom:19}).addTo(mapaRC);
+    PARROQUIAS.forEach(p=>{
+      L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.8,dashArray:'5 4',fillColor:p.color,fillOpacity:.06,interactive:false}).addTo(mapaRC);
+      const lats=p.coords.map(c=>c[0]),lngs=p.coords.map(c=>c[1]);
+      const cLat=lats.reduce((a,b)=>a+b,0)/lats.length, cLng=lngs.reduce((a,b)=>a+b,0)/lngs.length;
+      L.marker([cLat,cLng],{icon:L.divIcon({className:'parr-label-icon',html:`<div class="parr-label" style="color:${p.color}">${p.name}</div>`,iconSize:[120,20],iconAnchor:[60,10]}),interactive:false}).addTo(mapaRC);
+    });
+  } else {
+    mapaRC.invalidateSize();
+  }
+  // Redraw lines
+  rcLayers.forEach(l=>mapaRC.removeLayer(l)); rcLayers=[];
+  const COLOR = { programado:'#B8690A', ejecucion:'#1C2B5E', ejecutado:'#1B7B4E' };
+  const DASH  = { programado:'10 6', ejecucion:null, ejecutado:null };
+  const allPts = [];
+  intervenciones.forEach((i,idx)=>{
+    if (!i.puntos||i.puntos.length<2) return;
+    const color = COLOR[i.estado]||'#B8690A';
+    const line  = L.polyline(i.puntos,{color,weight:5,opacity:.85,dashArray:DASH[i.estado]}).addTo(mapaRC);
+    line.bindPopup(`<div style="font-family:'DM Sans',sans-serif;min-width:160px">
+      <div style="font-weight:600;font-size:.85rem;color:${color};margin-bottom:4px">${ESTADO_CFG[i.estado]?.icon||''} ${ESTADO_CFG[i.estado]?.label||i.estado}</div>
+      <div style="font-size:.8rem;font-weight:500;color:#1C2B5E;margin-bottom:3px">${i.nombre}</div>
+      <div style="font-size:.7rem;color:#7A839A">Inicio: <strong>${i.fecha_ini||'—'}</strong>${i.fecha_fin?' · Fin: <strong>'+i.fecha_fin+'</strong>':''}</div>
+      ${i.obs?`<div style="font-size:.7rem;color:#4A5468;margin-top:4px">${i.obs}</div>`:''}
+      <div style="margin-top:6px"><a href="#" onclick="event.preventDefault();editarIntervencion(${idx});setView('cronograma')" style="font-size:.7rem;color:var(--navy);font-weight:500">Editar →</a></div>
+    </div>`,{maxWidth:240});
+    rcLayers.push(line);
+    i.puntos.forEach(p=>allPts.push(p));
+    // Start/end markers
+    const mS=L.circleMarker(i.puntos[0],{radius:5,fillColor:color,color:'#fff',weight:2,fillOpacity:1,interactive:false}).addTo(mapaRC);
+    const mE=L.circleMarker(i.puntos[i.puntos.length-1],{radius:5,fillColor:color,color:'#fff',weight:2,fillOpacity:1,interactive:false}).addTo(mapaRC);
+    rcLayers.push(mS,mE);
+  });
+  if (allPts.length) mapaRC.fitBounds(L.latLngBounds(allPts).pad(.15));
+}
+
+function renderTimeline() {
+  const el = document.getElementById('rc-timeline');
+  if (!el) return;
+  if (!intervenciones.length) {
+    el.innerHTML='<p style="font-size:.78rem;color:var(--gray-400);text-align:center;padding:2rem 0">Sin intervenciones.</p>';
+    return;
+  }
+  // Sort by fecha_ini
+  const sorted = [...intervenciones].sort((a,b)=>(a.fecha_ini||'').localeCompare(b.fecha_ini||''));
+  const COLOR = { programado:'#B8690A', ejecucion:'#1C2B5E', ejecutado:'#1B7B4E' };
+  el.innerHTML = sorted.map((i,n)=>{
+    const cfg   = ESTADO_CFG[i.estado]||ESTADO_CFG.programado;
+    const color = COLOR[i.estado]||'#B8690A';
+    const idx   = intervenciones.indexOf(i);
+    return `<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-50);position:relative">
+      <!-- dot + line -->
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:20px">
+        <div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 0 2px ${color};flex-shrink:0;margin-top:2px"></div>
+        ${n<sorted.length-1?`<div style="flex:1;width:2px;background:var(--gray-100);min-height:20px;margin-top:3px"></div>`:''}
+      </div>
+      <!-- content -->
+      <div style="flex:1;padding-bottom:${n<sorted.length-1?'0':'0'}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap">
+          <span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${cfg.bg};color:${color}">${cfg.icon} ${cfg.label}</span>
+          <span style="font-size:.68rem;color:var(--gray-400)">${i.fecha_ini||'—'}${i.fecha_fin?' → '+i.fecha_fin:''}</span>
+        </div>
+        <div style="font-size:.8rem;font-weight:500;color:var(--navy)">${i.nombre}</div>
+        ${i.obs?`<div style="font-size:.7rem;color:var(--gray-600);margin-top:2px">${i.obs}</div>`:''}
+        <div style="margin-top:5px">
+          <a href="#" onclick="event.preventDefault();editarIntervencion(${idx});setView('cronograma')" style="font-size:.68rem;color:var(--navy);font-weight:500">Editar →</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTablaRC() {
+  const el = document.getElementById('rc-tabla');
+  if (!el) return;
+  if (!intervenciones.length) {
+    el.innerHTML='<p style="font-size:.78rem;color:var(--gray-400);text-align:center;padding:2rem 0">Sin intervenciones registradas.</p>';
+    return;
+  }
+  const COLOR = { programado:'#B8690A', ejecucion:'#1C2B5E', ejecutado:'#1B7B4E' };
+  const sorted = [...intervenciones].sort((a,b)=>(a.fecha_ini||'').localeCompare(b.fecha_ini||''));
+  const rows = sorted.map(i=>{
+    const cfg=ESTADO_CFG[i.estado]||ESTADO_CFG.programado;
+    const color=COLOR[i.estado]||'#B8690A';
+    const idx=intervenciones.indexOf(i);
+    return `<tr style="border-bottom:1px solid var(--gray-50);cursor:pointer" onclick="editarIntervencion(${idx});setView('cronograma')">
+      <td style="padding:9px 10px;font-weight:500;color:var(--navy);font-size:.78rem">${i.nombre}</td>
+      <td style="padding:9px 10px"><span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:${cfg.bg};color:${color}">${cfg.icon} ${cfg.label}</span></td>
+      <td style="padding:9px 10px;font-size:.75rem;color:var(--gray-600)">${i.fecha_ini||'—'}</td>
+      <td style="padding:9px 10px;font-size:.75rem;color:var(--gray-600)">${i.fecha_fin||'—'}</td>
+      <td style="padding:9px 10px;font-size:.72rem;color:var(--gray-400);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.obs||'—'}</td>
+      <td style="padding:9px 10px;font-size:.7rem;text-align:center;color:var(--gray-400)">${i.puntos?.length||0} pts</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.78rem">
+    <thead><tr style="border-bottom:1.5px solid var(--gray-100)">
+      <th style="padding:0 10px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">Sector / Vía</th>
+      <th style="padding:0 10px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">Estado</th>
+      <th style="padding:0 10px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">F. Inicio</th>
+      <th style="padding:0 10px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">F. Fin est.</th>
+      <th style="padding:0 10px 8px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">Observaciones</th>
+      <th style="padding:0 10px 8px;text-align:center;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);font-weight:500">Traza</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('headerDate').textContent =
+  new Date().toLocaleDateString('es-EC',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// Load intervenciones from localStorage
+loadIntervenciones();
+</script>
+</div>
+</body>
+</html>
