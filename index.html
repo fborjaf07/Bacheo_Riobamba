@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Baches · GADM Riobamba 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy-900:#0A2154;--navy-800:#0F2D6E;--navy-700:#1C3F8B;--navy-600:#2E57AC;
+  --red-600:#C0392B;--red-500:#E74C3C;
+  --gold-500:#F1C40F;--gold-600:#D4A607;
+  --green-600:#1B7B4E;--amber-600:#B8690A;
+  --brand:var(--navy-800);--brand-dark:var(--navy-900);--brand-mid:var(--navy-700);--brand-accent:var(--red-600);
+  --ink:#0E1830;--ink-2:#2A344D;--ink-3:#4D5673;--ink-4:#7A819A;
+  --line:#E2E4EC;--line-strong:#C8CCD8;
+  --bg:#F5F3EE;--bg-card:#FFFFFF;--bg-warm:#FBF8F2;--bg-soft:#EEF1F7;
+  --radius:14px;--radius-sm:8px;--radius-lg:20px;
+  --shadow-sm:0 1px 2px rgba(14,24,48,.06),0 1px 3px rgba(14,24,48,.04);
+  --shadow:0 4px 16px rgba(14,24,48,.07),0 1px 2px rgba(14,24,48,.05);
+  --serif:"DM Serif Display","Playfair Display",Georgia,serif;
+  --sans:"Inter","DM Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+
+/* TOPSTRIP */
+.topstrip{background:var(--brand-dark);color:#fff;font-size:12px;display:flex;align-items:center;gap:18px;padding:7px 40px;letter-spacing:.02em}
+.topstrip .egov{display:inline-flex;gap:3px;align-items:baseline;font-weight:700;letter-spacing:.04em}
+.topstrip .egov .dot{color:var(--gold-500)}
+.topstrip .egov.c-azul .dot{color:#6FB0E8}.topstrip .egov.c-verde .dot{color:#58C474}
+.topstrip .egov.c-oro .dot{color:var(--gold-500)}.topstrip .egov.c-cyan .dot{color:#5CC8D8}
+.topstrip .spacer{flex:1}
+.topstrip .meta{opacity:.65;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em}
+
+/* HEADER */
+.mast{background:var(--brand);color:#fff;padding:22px 40px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;border-bottom:3px solid var(--brand-accent);position:relative}
+.mast::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:3px;background:linear-gradient(90deg,var(--brand-accent) 0 33%,var(--gold-500) 33% 66%,var(--green-600) 66% 100%)}
+.mast .crest{width:62px;height:62px;background:#fff;border-radius:10px;padding:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:2rem}
+.mast .titlebar h1{font-family:var(--serif);font-size:26px;line-height:1.1;font-weight:400;margin:0 0 2px;letter-spacing:-.01em}
+.mast .titlebar .sub{font-size:12.5px;opacity:.85;letter-spacing:.03em}
+.mast .titlebar .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;opacity:.7;margin-bottom:4px;display:block}
+.mast .right{text-align:right;font-size:12px}
+.mast .right .date{font-weight:500;font-size:13px}
+.mast .right .pubtag{display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:rgba(255,255,255,.14);padding:5px 12px;border-radius:20px;font-size:11px;letter-spacing:.04em}
+.mast .right .pubtag::before{content:'';width:6px;height:6px;border-radius:50%;background:#58C474;box-shadow:0 0 0 3px rgba(88,196,116,.25)}
+
+/* BANNER */
+.working-strip{background:repeating-linear-gradient(-45deg,var(--amber-600) 0,var(--amber-600) 18px,#a05808 18px,#a05808 36px);padding:0}
+.working-inner{background:rgba(0,0,0,.42);padding:9px 40px;display:flex;align-items:center;gap:10px;color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.04em}
+.w-dot{width:7px;height:7px;border-radius:50%;background:var(--gold-500);flex-shrink:0;animation:wd 1s ease-in-out infinite}
+@keyframes wd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.6)}}
+
+/* MAIN */
+main{max-width:1480px;margin:0 auto;padding:30px 40px 60px}
+.section-ey{font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--ink-4);font-weight:600;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-ey::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* KPI DUO */
+.kpi-duo{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:30px 34px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--kc,var(--brand))}
+.kpi-card::after{content:'';position:absolute;right:-40px;bottom:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,var(--kr,rgba(15,45,110,.06)) 0%,transparent 70%);pointer-events:none}
+.kpi-card.k-total{--kc:var(--red-600);--kr:rgba(192,57,43,.08)}
+.kpi-card.k-semana{--kc:var(--brand);--kr:rgba(15,45,110,.08)}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-4);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.kpi-icon{width:28px;height:28px;border-radius:7px;background:var(--kc,var(--brand));display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.kpi-num{font-family:var(--serif);font-size:72px;line-height:1;color:var(--ink);font-weight:400;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.kpi-caption{font-size:13px;color:var(--ink-3);line-height:1.4}
+.kpi-caption strong{color:var(--kc,var(--brand));font-weight:600}
+
+
+/* MAPA SECTION */
+.map-section{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.mc-head{padding:16px 22px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mc-head h3{font-family:var(--serif);font-size:20px;font-weight:400;margin:0;color:var(--ink)}
+.mc-head .meta{font-size:12px;color:var(--ink-4)}
+.layer-toggle{display:flex;gap:4px;margin-left:auto}
+.layer-toggle button{border:1px solid var(--line);background:var(--bg-soft);color:var(--ink-3);font-size:12px;padding:5px 12px;border-radius:20px;transition:all .15s}
+.layer-toggle button:hover{border-color:var(--brand);color:var(--brand)}
+.layer-toggle button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.map-filters{display:flex;gap:6px;flex-wrap:wrap;padding:10px 22px;border-bottom:1px solid var(--line)}
+.chip{background:var(--bg-soft);border:1px solid transparent;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;color:var(--ink-3);transition:all .15s}
+.chip:hover{background:var(--line)}.chip.active{background:var(--brand);color:#fff}
+.map-body{display:grid;grid-template-columns:1fr 300px;height:540px}
+#leaflet-map{width:100%;height:100%}
+.map-side{border-left:1px solid var(--line);overflow-y:auto;background:var(--bg-warm)}
+.map-side::-webkit-scrollbar{width:3px}.map-side::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:2px}
+.side-hd{padding:14px 16px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-3)}
+.side-hd strong{font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:400;display:block;margin-bottom:2px}
+.bache-row{padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:background .15s;border-left:3px solid transparent}
+.bache-row:hover{background:var(--bg-soft)}.bache-row.sel{background:var(--bg-soft);border-left-color:var(--brand-accent)}
+.br-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.br-info{flex:1;min-width:0}
+.br-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.br-meta{font-size:11px;color:var(--ink-4)}
+.br-sev{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px;flex-shrink:0;margin-top:2px}
+.sv-alta{background:rgba(192,57,43,.1);color:var(--red-600)}
+.sv-media{background:rgba(184,105,10,.1);color:var(--amber-600)}
+.sv-baja{background:rgba(27,123,78,.1);color:var(--green-600)}
+.empty-side{padding:30px 16px;text-align:center;color:var(--ink-4);font-size:13px;line-height:1.6}
+.empty-side .ei{font-size:2.2rem;margin-bottom:10px;display:block}
+.map-legend{display:flex;align-items:center;gap:18px;padding:10px 22px;background:var(--bg-warm);border-top:1px solid var(--line);flex-wrap:wrap;font-size:11.5px;color:var(--ink-3)}
+.map-legend .item{display:flex;align-items:center;gap:6px}
+.map-legend .sw{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+/* POPUP */
+.leaflet-popup-content-wrapper{border-radius:12px!important;border:1px solid var(--line)!important;box-shadow:0 8px 28px rgba(14,24,48,.14)!important;padding:0!important;overflow:hidden}
+.leaflet-popup-content{margin:0!important;width:auto!important}
+.pw{font-family:var(--sans);min-width:220px}
+.pw-top{color:#fff;padding:12px 16px 10px}
+.pw-top .pw-st{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.2);padding:2px 7px;border-radius:4px;margin-bottom:5px;display:inline-block}
+.pw-top h4{font-family:var(--serif);font-size:15px;font-weight:400;margin:0;line-height:1.2}
+.pw-body{padding:12px 16px}
+.pw-row{font-size:12px;color:var(--ink-3);margin-bottom:5px}
+.pw-row span{color:var(--ink);font-weight:500}
+.pw-coords{font-size:10.5px;color:var(--ink-4);margin-top:8px;font-variant-numeric:tabular-nums}
+
+/* PARROQUIA LABELS */
+.parr-label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75;white-space:nowrap;text-shadow:0 1px 2px rgba(255,255,255,.8)}
+
+/* DRAG OVERLAY */
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:0 8px 24px rgba(14,24,48,.25);display:none;animation:tu .25s ease;max-width:340px}
+@keyframes tu{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* FOOTER */
+footer{background:var(--brand-dark);color:rgba(255,255,255,.7);font-size:12px;padding:22px 40px}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:32px;margin-bottom:16px}
+footer h5{color:#fff;font-size:13px;margin:0 0 8px;font-weight:600}
+footer p{margin:0;line-height:1.6;font-size:11.5px}
+.foot-links{display:flex;flex-direction:column;gap:4px}
+.foot-links a{color:rgba(255,255,255,.55);text-decoration:none;font-size:11.5px;transition:color .15s}
+.foot-links a:hover{color:var(--gold-500)}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:12px;display:flex;justify-content:space-between;font-size:10.5px;opacity:.5}
+
+@media(max-width:900px){
+  .topstrip,.working-inner,.mast,main,footer{padding-left:20px;padding-right:20px}
+  .kpi-duo{grid-template-columns:1fr}
+  .map-body{grid-template-columns:1fr;grid-template-rows:360px auto;height:auto}
+  .map-side{border-left:none;border-top:1px solid var(--line);max-height:280px}
+  .foot-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPSTRIP -->
+<div class="topstrip">
+  <span class="egov c-azul">e<span class="dot">·</span>GOB</span>
+  <span class="egov c-verde">e<span class="dot">·</span>DOC</span>
+  <span class="egov">TERRITORIOS INTELIGENTES</span>
+  <span class="egov c-oro">e<span class="dot">·</span>REGIS</span>
+  <span class="egov c-cyan">e<span class="dot">·</span>AQUA</span>
+  <span class="spacer"></span>
+  <span class="meta">Sistema Municipal de Gestión · Riobamba · Ecuador</span>
+</div>
+
+<!-- HEADER -->
+<header class="mast">
+  <div class="crest">🏛️</div>
+  <div class="titlebar">
+    <span class="eyebrow">Alcaldía Ciudadana de Riobamba · Obras Públicas 2025</span>
+    <h1>Sistema de Gestión de Baches</h1>
+    <div class="sub">Dirección de Gestión de Obras Públicas · GADM del Cantón Riobamba · Chimborazo</div>
+  </div>
+  <div class="right">
+    <div class="date" id="fecha-hoy">—</div>
+    <div class="pubtag">Portal público · Datos abiertos</div>
+  </div>
+</header>
+
+<!-- BANNER -->
+<div class="working-strip">
+  <div class="working-inner">
+    <div class="w-dot"></div>
+    <div class="w-dot" style="animation-delay:.3s"></div>
+    <div class="w-dot" style="animation-delay:.6s"></div>
+    🚧&nbsp; Estamos trabajando en el mejoramiento vial de Riobamba — Gracias por tu comprensión ciudadana &nbsp;🚧
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <div class="section-ey">Intervenciones viales · Baches registrados</div>
+
+  <div class="kpi-duo">
+    <div class="kpi-card k-total">
+      <div class="kpi-label"><span class="kpi-icon">🕳️</span> Baches totales acumulados</div>
+      <div class="kpi-num" id="num-total">0</div>
+      <div class="kpi-caption">Total de intervenciones registradas en el período.<br><strong id="cap-semana"></strong></div>
+    </div>
+    <div class="kpi-card k-semana">
+      <div class="kpi-label"><span class="kpi-icon" style="background:var(--brand)">📅</span> Baches intervenidos esta semana</div>
+      <div class="kpi-num" id="num-semana">0</div>
+      <div class="kpi-caption">Registros marcados como intervención de los últimos 7 días.</div>
+    </div>
+  </div>
+
+  <div class="map-section">
+    <div class="mc-head">
+      <h3>Cantón Riobamba — Mapa de baches</h3>
+      <div class="meta"><span id="map-count">0 baches georreferenciados</span></div>
+      <div class="layer-toggle">
+        <button class="active" onclick="setBasemap('voyager',this)">Claro</button>
+        <button onclick="setBasemap('esquematico',this)">Esquemático</button>
+        <button onclick="setBasemap('satelite',this)">Satélite</button>
+      </div>
+    </div>
+    <div class="map-filters">
+      <button class="chip active" onclick="filtrar('todos',this)">Todos</button>
+      <button class="chip" onclick="filtrar('alta',this)">🔴 Alta</button>
+      <button class="chip" onclick="filtrar('media',this)">🟠 Media</button>
+      <button class="chip" onclick="filtrar('baja',this)">🟢 Baja</button>
+      <button class="chip" onclick="filtrar('semana',this)">📅 Esta semana</button>
+    </div>
+    <div class="map-body">
+      <div id="leaflet-map"></div>
+      <div class="map-side" id="map-side">
+        <div class="empty-side">
+          <span class="ei">🗺️</span>
+          El mapa está listo sobre Riobamba con las parroquias marcadas.<br><br>
+          Carga un archivo Excel para visualizar los baches.
+        </div>
+      </div>
+    </div>
+    <div class="map-legend">
+      <div class="item"><span class="sw" style="background:#C0392B"></span>Severidad Alta</div>
+      <div class="item"><span class="sw" style="background:#B8690A"></span>Severidad Media</div>
+      <div class="item"><span class="sw" style="background:#1B7B4E"></span>Severidad Baja</div>
+      <div class="item" style="margin-left:auto;font-size:10.5px">Coordenadas WGS84 · Zona 17M</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- CRONOGRAMA DE INTERVENCIONES -->
+<section id="seccion-cronograma" style="display:none;background:#F5F6FA;padding:2.5rem 0;border-top:3px solid #1B7B4E">
+  <div style="max-width:1100px;margin:0 auto;padding:0 2rem">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.5rem;flex-wrap:wrap">
+      <div style="width:44px;height:44px;border-radius:50%;background:#1B7B4E;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🚧</div>
+      <div>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:#1C2B5E;font-weight:400;margin:0">Cronograma de intervenciones viales</h2>
+        <p style="font-size:.78rem;color:#7A839A;margin:3px 0 0">Trabajos programados y ejecutados · Cantón Riobamba 2025</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap" id="cron-filtros">
+        <button class="cron-chip active" onclick="filtrarCron(this,'todos')">Todos</button>
+        <button class="cron-chip" onclick="filtrarCron(this,'programado')">🕐 Programados</button>
+        <button class="cron-chip" onclick="filtrarCron(this,'ejecucion')">🚧 En ejecución</button>
+        <button class="cron-chip" onclick="filtrarCron(this,'ejecutado')">✅ Ejecutados</button>
+      </div>
+    </div>
+
+    <!-- Mapa cronograma -->
+    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(28,43,94,.08);padding:1.2rem;margin-bottom:1.2rem">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:#7A839A;font-weight:500;margin-bottom:10px">Mapa de intervenciones · líneas por sector</div>
+      <div id="map-cron-pub" style="height:380px;border-radius:8px;background:#e8ecf0"></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:.7rem;color:#4A5468">
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:24px;height:4px;background:#B8690A;border-radius:2px"></div>Programado</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:24px;height:4px;background:#1C2B5E;border-radius:2px"></div>En ejecución</div>
+        <div style="display:flex;align-items:center;gap:5px"><div style="width:24px;height:4px;background:#1B7B4E;border-radius:2px"></div>Ejecutado</div>
+      </div>
+    </div>
+
+    <!-- Lista tarjetas -->
+    <div id="cron-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+    <div id="cron-empty" style="display:none;text-align:center;padding:2rem;font-size:.82rem;color:#7A839A">No hay intervenciones publicadas aún.</div>
+  </div>
+</section>
+
+<style>
+.cron-chip{font-size:.7rem;padding:5px 13px;border-radius:20px;border:1.5px solid #D8DCE8;background:transparent;color:#4A5468;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;white-space:nowrap}
+.cron-chip.active{background:#1B7B4E;color:#fff;border-color:#1B7B4E}
+.cron-chip:hover:not(.active){background:#E8F5EF;border-color:#1B7B4E;color:#1B7B4E}
+</style>
+
+<footer>
+  <div class="foot-grid">
+    <div>
+      <h5>Alcaldía Ciudadana de Riobamba</h5>
+      <p>Dirección de Gestión de Obras Públicas · GADM del Cantón Riobamba.<br>5 de Junio 11-01 entre Veloz y Primera Constituyente · Riobamba, Ecuador.<br>Teléfono: (03) 2966-500 · Horario: 08h00 – 17h00.</p>
+    </div>
+    <div>
+      <h5>Enlaces</h5>
+      <div class="foot-links">
+        <a href="#">Transparencia LOTAIP</a>
+        <a href="#">Portal COMPRASPÚBLICAS</a>
+        <a href="#">Rendición de cuentas</a>
+        <a href="https://fborjaf07.github.io/obras-publicas/" target="_blank">Portal Obras Públicas</a>
+      </div>
+    </div>
+    <div>
+      <h5>Ciudadanía</h5>
+      <div class="foot-links">
+        <a href="#">Ventanilla virtual</a>
+        <a href="#">Trámites y formularios</a>
+        <a href="#">Contáctenos</a>
+        <a href="#">Noticias</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2025 GADM Riobamba · Todos los derechos reservados</span>
+    <span>LOSNCP R.O. 140 (07-oct-2025) · Reglamento D.E. 193</span>
+  </div>
+</footer>
+
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// FECHA
+(function(){
+  const d=new Date();
+  document.getElementById('fecha-hoy').textContent=
+    d.toLocaleDateString('es-EC',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+     .replace(/^\w/,c=>c.toUpperCase());
+})();
+
+// TILE URLS — idéntico al portal de obras
+const TILE_URLS={
+  voyager:{url:'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',attr:'© OpenStreetMap · © CARTO'},
+  esquematico:{url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',attr:'© OpenStreetMap · © CARTO'},
+  satelite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'© Esri · Maxar · Earthstar Geographics'},
+};
+
+// PARROQUIAS — idénticas al portal de obras
+const PARROQUIAS=[
+  {id:'lizarzaburu',name:'Lizarzaburu',color:'#1A5FA0',coords:[[-1.6545,-78.6660],[-1.6545,-78.6490],[-1.6635,-78.6490],[-1.6680,-78.6580],[-1.6650,-78.6680]]},
+  {id:'velasco',name:'Velasco',color:'#1B7B4E',coords:[[-1.6545,-78.6490],[-1.6545,-78.6380],[-1.6650,-78.6380],[-1.6650,-78.6445],[-1.6635,-78.6490]]},
+  {id:'maldonado',name:'Maldonado',color:'#7A4A0A',coords:[[-1.6680,-78.6580],[-1.6635,-78.6490],[-1.6650,-78.6445],[-1.6760,-78.6460],[-1.6750,-78.6600]]},
+  {id:'veloz',name:'Veloz',color:'#2E6B1A',coords:[[-1.6650,-78.6445],[-1.6650,-78.6380],[-1.6780,-78.6380],[-1.6780,-78.6460],[-1.6760,-78.6460]]},
+  {id:'yaruquies',name:'Yaruquíes',color:'#4A2E8A',coords:[[-1.6750,-78.6850],[-1.6750,-78.6600],[-1.6900,-78.6600],[-1.6900,-78.6850]]},
+  {id:'sanluis',name:'San Luis',color:'#854F0B',coords:[[-1.6780,-78.6460],[-1.6780,-78.6280],[-1.6950,-78.6280],[-1.6950,-78.6460]]},
+];
+
+// MAPA — centro y zoom iguales al portal de obras
+const leafletMap=L.map('leaflet-map',{center:[-1.6720,-78.6540],zoom:14,zoomControl:true,scrollWheelZoom:true});
+let tileLayer=null,parroquiasLayer=null;
+const pinsLayer=L.layerGroup().addTo(leafletMap);
+
+function setBasemapLayer(k){
+  if(tileLayer)leafletMap.removeLayer(tileLayer);
+  const t=TILE_URLS[k];
+  tileLayer=L.tileLayer(t.url,{attribution:t.attr,maxZoom:19}).addTo(leafletMap);
+}
+
+function drawParroquias(){
+  if(parroquiasLayer)leafletMap.removeLayer(parroquiasLayer);
+  parroquiasLayer=L.layerGroup().addTo(leafletMap);
+  PARROQUIAS.forEach(p=>{
+    L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.9,dashArray:'5 4',fillColor:p.color,fillOpacity:.07,interactive:false}).addTo(parroquiasLayer);
+    const lats=p.coords.map(c=>c[0]),lngs=p.coords.map(c=>c[1]);
+    const cLat=lats.reduce((a,b)=>a+b,0)/lats.length;
+    const cLng=lngs.reduce((a,b)=>a+b,0)/lngs.length;
+    L.marker([cLat,cLng],{
+      icon:L.divIcon({className:'parr-label-icon',html:`<div class="parr-label" style="color:${p.color}">${p.name}</div>`,iconSize:[120,20],iconAnchor:[60,10]}),
+      interactive:false
+    }).addTo(parroquiasLayer);
+  });
+}
+
+// Init mapa al cargar
+setBasemapLayer('voyager');
+drawParroquias();
+
+window.setBasemap=function(k,el){
+  document.querySelectorAll('.layer-toggle button').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  setBasemapLayer(k);
+};
+
+// SEVERIDAD
+const SEV={
+  alta:{color:'#C0392B',label:'Alta',cls:'sv-alta'},
+  media:{color:'#B8690A',label:'Media',cls:'sv-media'},
+  baja:{color:'#1B7B4E',label:'Baja',cls:'sv-baja'},
+};
+function normSev(s){const v=String(s||'').toLowerCase().trim();if(v==='alta'||v==='high')return'alta';if(v==='media'||v==='medio'||v==='medium')return'media';return'baja'}
+function isSemana(r){const v=r.semana??r.Semana??r.esta_semana??'';if(typeof v==='boolean')return v;if(typeof v==='number')return v===1;return['si','sí','yes','true','1','x'].includes(String(v).toLowerCase().trim())}
+
+let BACHES=[],selIdx=-1,filtroActivo='todos',markers=[],_lastData=[];
+
+// CONTADORES
+function animCount(id,target){
+  const el=document.getElementById(id);
+  const s=parseInt(el.textContent)||0;
+  const dur=700,t0=performance.now();
+  const step=now=>{const p=Math.min((now-t0)/dur,1);el.textContent=Math.round(s+(target-s)*p);if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+function updateCounters(){
+  const sem=BACHES.filter(b=>b._semana).length;
+  animCount('num-total',BACHES.length);
+  animCount('num-semana',sem);
+  document.getElementById('cap-semana').textContent=sem>0?`${sem} de ellos corresponden a esta semana.`:'';
+  document.getElementById('map-count').textContent=`${BACHES.length} bache${BACHES.length!==1?'s':''} georreferenciado${BACHES.length!==1?'s':''}`;
+}
+
+// PINES
+function mkPinIcon(color,sel){
+  const s=sel?36:28,b=sel?3:2.5;
+  const sh=sel?'0 3px 12px rgba(0,0,0,.35)':'0 2px 8px rgba(0,0,0,.20)';
+  return L.divIcon({className:'',html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:${color};border:${b}px solid #fff;box-shadow:${sh}"></div>`,iconSize:[s,s],iconAnchor:[s/2,s/2],popupAnchor:[0,-(s/2+4)]});
+}
+
+function renderPins(data){
+  pinsLayer.clearLayers();markers=[];
+  data.forEach((b,i)=>{
+    if(isNaN(b._lat)||isNaN(b._lng))return;
+    const sc=SEV[b._sev];
+    const mk=L.marker([b._lat,b._lng],{icon:mkPinIcon(sc.color,selIdx===i)});
+    mk.bindPopup(`<div class="pw"><div class="pw-top" style="background:${sc.color}"><div class="pw-st">${sc.label}</div><h4>${b.nombre}</h4></div><div class="pw-body">${b.descripcion?`<div class="pw-row">Descripción: <span>${b.descripcion}</span></div>`:''}<div class="pw-row">Fecha: <span>${b.fecha||'—'}</span></div>${b._semana?`<div class="pw-row" style="color:var(--brand);font-weight:600;font-size:11.5px">✓ Esta semana</div>`:''}<div class="pw-coords">📍 ${b._lat.toFixed(6)}, ${b._lng.toFixed(6)}</div></div></div>`,{maxWidth:280});
+    mk.on('click',()=>selectBache(i,data));
+    mk.addTo(pinsLayer);markers[i]=mk;
+  });
+}
+
+function renderSide(data){
+  const el=document.getElementById('map-side');
+  if(!data.length){el.innerHTML=`<div class="empty-side"><span class="ei">🗺️</span>El mapa está sobre Riobamba.<br><br>Carga un Excel para ver los baches.</div>`;return}
+  el.innerHTML=`<div class="side-hd"><strong>Intervenciones en el mapa</strong>${data.length} bache${data.length!==1?'s':''}</div>`+
+    data.map((b,i)=>{const sc=SEV[b._sev];return`<div class="bache-row${selIdx===i?' sel':''}" id="br-${i}" onclick="selectBache(${i},null)"><div class="br-dot" style="background:${sc.color}"></div><div class="br-info"><div class="br-name">${b.nombre}</div><div class="br-meta">${b.fecha||''}${b._semana?' · Esta semana':''}</div></div><div class="br-sev ${sc.cls}">${sc.label}</div></div>`}).join('');
+}
+
+window.selectBache=function(i,data){
+  if(data)_lastData=data;selIdx=i;
+  renderPins(_lastData);renderSide(_lastData);
+  const b=_lastData[i];
+  if(b&&!isNaN(b._lat)){leafletMap.flyTo([b._lat,b._lng],17,{duration:.7});if(markers[i])markers[i].openPopup()}
+  const row=document.getElementById(`br-${i}`);if(row)row.scrollIntoView({block:'nearest',behavior:'smooth'});
+};
+
+window.filtrar=function(tipo,btn){
+  document.querySelectorAll('.map-filters .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');filtroActivo=tipo;
+  let data;
+  if(tipo==='todos')data=BACHES;
+  else if(tipo==='semana')data=BACHES.filter(b=>b._semana);
+  else data=BACHES.filter(b=>b._sev===tipo);
+  selIdx=-1;_lastData=data;renderPins(data);renderSide(data);
+  const coords=data.filter(b=>b._lat).map(b=>[b._lat,b._lng]);
+  if(coords.length)leafletMap.fitBounds(L.latLngBounds(coords).pad(.15));
+  else leafletMap.setView([-1.6720,-78.6540],14);
+};
+
+// PROCESAR filas desde baches-data.json
+function processRows(rows){
+  BACHES=rows.map((r,idx)=>{
+    const lat=parseFloat(r.lat??0);
+    const lng=parseFloat(r.lng??0);
+    return{nombre:String(r.nombre??`Bache #${idx+1}`),descripcion:String(r.descripcion??''),fecha:String(r.fecha??''),foto_url:String(r.foto_url??''),_lat:lat,_lng:lng,_sev:normSev(r.severidad??''),_semana:isSemana(r)};
+  }).filter(b=>!isNaN(b._lat)&&!isNaN(b._lng)&&b._lat!==0&&b._lng!==0);
+  selIdx=-1;filtroActivo='todos';
+  document.querySelectorAll('.map-filters .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.map-filters .chip').classList.add('active');
+  _lastData=BACHES;updateCounters();renderPins(BACHES);renderSide(BACHES);
+  if(BACHES.length){const c=BACHES.map(b=>[b._lat,b._lng]);leafletMap.fitBounds(L.latLngBounds(c).pad(.15))}
+}
+
+// Carga automática desde baches-data.json al abrir el portal
+fetch('baches-data.json?v='+Date.now())
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(d=>{
+    if(d&&d.baches&&d.baches.length){
+      processRows(d.baches);
+      showToast('✓ '+d.baches.length+' bache'+(d.baches.length!==1?'s':'')+' cargado'+(d.baches.length!==1?'s':''));
+    }
+    if(d&&d.cronograma&&d.cronograma.length){
+      renderCronograma(d.cronograma);
+    }
+  })
+  .catch(()=>{});
+
+// ── CRONOGRAMA PORTAL PÚBLICO ──
+let CRON_DATA=[], cronFiltro='todos', mapaCronPub=null, cronLayers=[];
+
+const CRON_COLOR={ programado:'#B8690A', ejecucion:'#1C2B5E', ejecutado:'#1B7B4E' };
+const CRON_BG={    programado:'#FDF3E3', ejecucion:'#E8EBFA', ejecutado:'#E8F5EF' };
+const CRON_LABEL={ programado:'🕐 Programado', ejecucion:'🚧 En ejecución', ejecutado:'✅ Ejecutado' };
+
+const PARROQUIAS_PUB=[
+  {name:'Lizarzaburu',color:'#1A5FA0',coords:[[-1.6545,-78.6660],[-1.6545,-78.6490],[-1.6635,-78.6490],[-1.6680,-78.6580],[-1.6650,-78.6680]]},
+  {name:'Velasco',color:'#1B7B4E',coords:[[-1.6545,-78.6490],[-1.6545,-78.6380],[-1.6650,-78.6380],[-1.6650,-78.6445],[-1.6635,-78.6490]]},
+  {name:'Maldonado',color:'#7A4A0A',coords:[[-1.6680,-78.6580],[-1.6635,-78.6490],[-1.6650,-78.6445],[-1.6760,-78.6460],[-1.6750,-78.6600]]},
+  {name:'Veloz',color:'#2E6B1A',coords:[[-1.6650,-78.6445],[-1.6650,-78.6380],[-1.6780,-78.6380],[-1.6780,-78.6460],[-1.6760,-78.6460]]},
+  {name:'Yaruquíes',color:'#4A2E8A',coords:[[-1.6750,-78.6850],[-1.6750,-78.6600],[-1.6900,-78.6600],[-1.6900,-78.6850]]},
+  {name:'San Luis',color:'#854F0B',coords:[[-1.6780,-78.6460],[-1.6780,-78.6280],[-1.6950,-78.6280],[-1.6950,-78.6460]]},
+];
+
+function renderCronograma(data){
+  CRON_DATA=data;
+  document.getElementById('seccion-cronograma').style.display='block';
+  initMapaCronPub();
+  renderCronCards();
+}
+
+function initMapaCronPub(){
+  if(mapaCronPub){ dibujarLineasCron(); return; }
+  mapaCronPub=L.map('map-cron-pub',{center:[-1.6720,-78.6540],zoom:14});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap · © CARTO',maxZoom:19}).addTo(mapaCronPub);
+  PARROQUIAS_PUB.forEach(p=>{
+    L.polygon(p.coords,{color:p.color,weight:1.5,opacity:.8,dashArray:'5 4',fillColor:p.color,fillOpacity:.06,interactive:false}).addTo(mapaCronPub);
+  });
+  dibujarLineasCron();
+}
+
+function dibujarLineasCron(){
+  cronLayers.forEach(l=>mapaCronPub.removeLayer(l)); cronLayers=[];
+  const filtered=cronFiltro==='todos'?CRON_DATA:CRON_DATA.filter(i=>i.estado===cronFiltro);
+  filtered.forEach(i=>{
+    if(!i.puntos||i.puntos.length<2) return;
+    const color=CRON_COLOR[i.estado]||'#B8690A';
+    const line=L.polyline(i.puntos,{color,weight:5,opacity:.85,dashArray:i.estado==='programado'?'10 6':null}).addTo(mapaCronPub);
+    line.bindPopup(`<div style="font-family:'DM Sans',sans-serif;font-size:.8rem"><strong style="color:${color}">${CRON_LABEL[i.estado]}</strong><br><span style="font-weight:500">${i.nombre}</span><br><span style="font-size:.7rem;color:#7A839A">Inicio: ${i.fecha_ini||'—'}${i.fecha_fin?' · Fin: '+i.fecha_fin:''}</span>${i.observaciones?'<br><span style="font-size:.7rem;color:#4A5468">'+i.observaciones+'</span>':''}</div>`,{maxWidth:220});
+    cronLayers.push(line);
+    // Decorative arrow in middle
+    const mid=Math.floor(i.puntos.length/2);
+    const dot=L.circleMarker(i.puntos[mid]||i.puntos[0],{radius:5,fillColor:color,color:'#fff',weight:2,fillOpacity:1,interactive:false}).addTo(mapaCronPub);
+    cronLayers.push(dot);
+  });
+  if(cronLayers.length){
+    const allPts=filtered.flatMap(i=>i.puntos||[]).filter(p=>p&&p.length===2);
+    if(allPts.length) mapaCronPub.fitBounds(L.latLngBounds(allPts).pad(.2));
+  }
+}
+
+function renderCronCards(){
+  const cards=document.getElementById('cron-cards');
+  const empty=document.getElementById('cron-empty');
+  const filtered=cronFiltro==='todos'?CRON_DATA:CRON_DATA.filter(i=>i.estado===cronFiltro);
+  if(!filtered.length){ cards.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  cards.innerHTML=filtered.map(i=>{
+    const color=CRON_COLOR[i.estado]||'#B8690A';
+    const bg=CRON_BG[i.estado]||'#FDF3E3';
+    const lbl=CRON_LABEL[i.estado]||'';
+    return `<div style="background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(28,43,94,.08);padding:1rem 1.1rem;border-top:3px solid ${color}">
+      <div style="display:inline-block;font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:20px;background:${bg};color:${color};margin-bottom:8px">${lbl}</div>
+      <div style="font-weight:500;color:#1C2B5E;font-size:.88rem;margin-bottom:5px">${i.nombre}</div>
+      <div style="font-size:.72rem;color:#7A839A">
+        📅 Inicio: <strong style="color:#1C2B5E">${i.fecha_ini||'—'}</strong>
+        ${i.fecha_fin?` &nbsp;·&nbsp; Fin est.: <strong style="color:#1C2B5E">${i.fecha_fin}</strong>`:''}
+      </div>
+      ${i.observaciones?`<div style="margin-top:7px;font-size:.72rem;color:#4A5468;border-left:3px solid ${color};padding-left:8px;line-height:1.5">${i.observaciones}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function filtrarCron(el,f){
+  cronFiltro=f;
+  document.querySelectorAll('.cron-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  dibujarLineasCron();
+  renderCronCards();
+}
+
+function showToast(msg,isErr){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.background=isErr?'var(--red-600)':'var(--ink)';el.style.display='block';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',3200);
+}
+</script>
+</body>
+</html>
